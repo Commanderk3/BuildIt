@@ -36,6 +36,66 @@ export default function Inspector() {
             />
           </div>
 
+          {/* BACKGROUND COLOR */}
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+              Background color
+            </label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                type="color"
+                value={selected.style.backgroundColor ?? "#000000"}
+                style={{ width: "40px", height: "30px" }}
+                onChange={(e) => updateStyle("backgroundColor", e.target.value)}
+              />
+              <input
+                type="text"
+                value={selected.style.backgroundColor ?? ""}
+                readOnly // ← Add this to prevent onChange
+                style={{
+                  flex: 1,
+                  padding: "4px 8px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* TEXT COLOR */}
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+              Color
+            </label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                type="color"
+                value={selected.style.color ?? ""}
+                style={{ width: "40px", height: "30px" }}
+                readOnly
+                onChange={(e) => updateStyle("color", e.target.value)}
+              />
+              <input
+                type="text"
+                value={selected.style.color ?? ""}
+                placeholder={selected.style.color}
+                style={{ flex: 1, padding: "4px 8px" }}
+              />
+            </div>
+          </div>
+
+          {/* MARGIN */}
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+              Margin
+            </label>
+            <input
+              type="text"
+              value={selected.style.margin ?? ""}
+              style={{ width: "100%", padding: "4px 8px" }}
+              onChange={(e) => updateStyle("margin", e.target.value)}
+            />
+          </div>
+
           {/* PADDING */}
           <div style={{ marginTop: 16 }}>
             <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
@@ -43,42 +103,69 @@ export default function Inspector() {
             </label>
             <input
               type="text"
-              placeholder="20px"
+              value={selected.style.padding ?? ""}
               style={{ width: "100%", padding: "4px 8px" }}
               onChange={(e) => updateStyle("padding", e.target.value)}
             />
           </div>
 
-          {/* BACKGROUND */}
+          {/* BORDER STYLE */}
           <div style={{ marginTop: 16 }}>
             <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
-              Background
+              Border style
             </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <select
+              style={{ width: "100%", padding: "4px 8px" }}
+              onChange={(e) => updateStyle("borderStyle", e.target.value)}
+            >
+              <option value="">None</option>
+              <option value="solid">Solid</option>
+              <option value="dashed">Dashed</option>
+              <option value="dotted">Dotted</option>
+              <option value="double">Double</option>
+            </select>
+          </div>
+
+          {/* BORDER COLOR */}
+          <div style={{ marginTop: 16 }}>
+            <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+              Border color
+            </label>
+            <div style={{ display: "flex", gap: "8px" }}>
               <input
                 type="color"
-                onChange={(e) => updateStyle("backgroundColor", e.target.value)}
+                style={{ width: "40px", height: "30px" }}
+                onChange={(e) => updateStyle("borderColor", e.target.value)}
               />
-              <span style={{ fontSize: 12, color: "#666" }}>
-                Click to change
-              </span>
+              <input
+                type="text"
+                style={{ flex: 1, padding: "4px 8px" }}
+                onChange={(e) => updateStyle("borderColor", e.target.value)}
+              />
             </div>
           </div>
 
-          {/* TEXT COLOR */}
+          {/* BORDER WIDTH */}
           <div style={{ marginTop: 16 }}>
             <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
-              Text color
+              Border width
             </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input
-                type="color"
-                onChange={(e) => updateStyle("color", e.target.value)}
-              />
-              <span style={{ fontSize: 12, color: "#666" }}>
-                Click to change
-              </span>
-            </div>
+            <select
+              style={{ width: "100%", padding: "4px 8px" }}
+              value={
+                String(selected.style.borderWidth || "").replace("px", "") ||
+                "1"
+              }
+              onChange={(e) =>
+                updateStyle("borderWidth", `${e.target.value}px`)
+              }
+            >
+              <option value="0">None</option>
+              <option value="1">1px</option>
+              <option value="2">2px</option>
+              <option value="4">4px</option>
+              <option value="8">8px</option>
+            </select>
           </div>
         </>
       ) : (

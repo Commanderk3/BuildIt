@@ -7,4 +7,4 @@ npx shadcn@latest add button
 // FIX : 
 
 1. Add type guards
-2. Update build provider to include the required functions and states.
+2. convert tailwind styling to hex for inspector, then back to tailwind when updating.

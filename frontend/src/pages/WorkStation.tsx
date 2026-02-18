@@ -1,101 +1,88 @@
 import { useEffect, useState } from "react";
-import SandpackWindow from "@/components/SandpackWindow";
 import { Button } from "@/components/ui/button";
-import { Code2, Eye } from "lucide-react";
+
 import { useBuild } from "@/contexts/BuildContext";
-import Inspector from "@/components/Inspector";
+import SandpackWindow from "../components/SandpackWindow";
+import { getStylesOfNode } from "../lib/getStyle";
+import { injectNodeIdsIntoTsx } from "@/lib/ast/parser";
 
-export default function App() {
-  const { selected, updateFiles, getFiles } = useBuild();
+type Mode = "preview" | "code_editor" | "inspector";
 
-  const [showCode, setShowCode] = useState(false);
+export default function WorkStation() {
+  const { setSelected, setInjectedFiles, setNodeMap, files } = useBuild();
+  const [mode, setMode] = useState<Mode>("preview");
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== "ELEMENT_SELECTED") return;
 
+      const { tag, nodeId, className, inlineStyle } = event.data.payload;
 
-    document.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (selected) selected.style.outline = "";
-      selected = e.target;
-      selected.style.outline = "2px solid red";
-
-      const nodeClass = [...selected.classList].find((c) =>
-        c.startsWith("node-"),
-      );
-
-      window.parent.postMessage(
-        {
-          type: "ELEMENT_SELECTED",
-          payload: {
-            tag: selected.tagName,
-            nodeId: nodeClass,
-            className: selected.className,
-          },
-        },
-        "*",
-      );
-    });
-
-    window.addEventListener("message", (event) => {
-      if (!selected) return;
-
-      if (event.data?.type === "APPLY_STYLE") {
-        const { property, value } = event.data.payload;
-        selected.style[property] = value;
+      if (nodeId === null) {
+        console.error("Node Id is null");
+        return;
       }
 
-      if (event.data?.type === "APPLY_TEXT") {
-        selected.textContent = event.data.payload;
-      }
-    });
-  }, []);
+      const style = getStylesOfNode(inlineStyle, className);
 
-  // Listen selection from iframe
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      if (event.data?.type === "ELEMENT_SELECTED") {
-        updateFiles(event.data.payload);
-      }
+      console.log(style);
+
+      setSelected({
+        tag,
+        nodeId,
+        className,
+        style,
+      });
     };
 
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, []);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [setSelected]);
+
+  useEffect(() => {
+    if (mode !== "inspector") return;
+    const result = injectNodeIdsIntoTsx(files);
+
+    setInjectedFiles(result.files);
+    setNodeMap(result.map);
+  }, [mode]);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <div
-          style={{
-            padding: "8px 16px",
-            borderBottom: "1px solid #ddd",
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
+    <div className="flex h-screen">
+      {/* Left side */}
+      <div className="flex flex-1 flex-col">
+        {/* Toolbar */}
+        <div className="flex justify-end gap-2 border-b p-2">
           <Button
-            variant="outline"
             size="sm"
-            onClick={() => setShowCode(!showCode)}
-            className="gap-2"
+            variant={mode === "preview" ? "default" : "outline"}
+            onClick={() => setMode("preview")}
           >
-            {showCode ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <Code2 className="h-4 w-4" />
-            )}
-            {showCode ? "Hide Code" : "Show Code"}
+            Preview
+          </Button>
+
+          <Button
+            size="sm"
+            variant={mode === "code_editor" ? "default" : "outline"}
+            onClick={() => setMode("code_editor")}
+          >
+            Code
+          </Button>
+
+          <Button
+            size="sm"
+            variant={mode === "inspector" ? "default" : "outline"}
+            onClick={() => setMode("inspector")}
+          >
+            Inspector
           </Button>
         </div>
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <SandpackWindow files={getFiles()} showCode={showCode} />
+
+        {/* Sandpack */}
+        <div className="flex flex-1 overflow-hidden">
+          <SandpackWindow mode={ mode } />
         </div>
       </div>
-
-      {/* Inspector */}
-      <Inspector />
     </div>
   );
 }
