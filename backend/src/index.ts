@@ -10,11 +10,10 @@ app.get("/health", (req, res)=> {
     res.status(200).send("Server is healthy.");
 });
 
+// use zod
 app.post("/ask", async(req, res)=> {
     const userQuery = req.body.data;
     const answer = await generateResponse(userQuery);
-    
-    console.log(answer);
     res.status(200).json({answer});
 });
 
