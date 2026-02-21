@@ -5,6 +5,7 @@ import { useBuild } from "@/contexts/BuildContext";
 import SandpackWindow from "../components/SandpackWindow";
 import { getStylesOfNode } from "../lib/getStyle";
 import { injectNodeIdsIntoTsx } from "@/lib/ast/parser";
+import { ChatWindow } from "@/components/Chat/ChatWindow";
 
 type Mode = "preview" | "code_editor" | "inspector";
 
@@ -16,7 +17,7 @@ export default function WorkStation() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type !== "ELEMENT_SELECTED") return;
 
-      const { tag, nodeId, className, inlineStyle } = event.data.payload;
+      const { tag, nodeId, className, inlineStyle, text } = event.data.payload;
 
       if (nodeId === null) {
         console.error("Node Id is null");
@@ -32,6 +33,7 @@ export default function WorkStation() {
         nodeId,
         className,
         style,
+        text,
       });
     };
 
@@ -48,8 +50,7 @@ export default function WorkStation() {
   }, [mode]);
 
   return (
-    <div className="flex h-screen">
-      {/* Left side */}
+    <div className="flex overflow-hidden">
       <div className="flex flex-1 flex-col">
         {/* Toolbar */}
         <div className="flex justify-end gap-2 border-b p-2">
@@ -79,8 +80,11 @@ export default function WorkStation() {
         </div>
 
         {/* Sandpack */}
-        <div className="flex flex-1 overflow-hidden">
-          <SandpackWindow mode={ mode } />
+        <div className="flex flex-1 overflow-hidden h-full w-screen">
+          <div className="w-[30vw]">
+            <ChatWindow />
+          </div>
+          <SandpackWindow mode={mode} />
         </div>
       </div>
     </div>
