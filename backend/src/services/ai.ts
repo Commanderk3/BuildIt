@@ -1,8 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { GEMINI_KEY } from "./config.js";
-import { PLANNER_AGENT_PROMPT } from "./constants/prompts.js";
+import { GEMINI_KEY } from "../config.js";
+import { PLANNER_AGENT_PROMPT } from "../constants/prompts.js";
+import invokeBuilderAgent from "../agents/builder.js";
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 
@@ -36,8 +37,14 @@ async function generateResponse(userQuery: string) {
 
   try {
     const parsed = JSON.parse(raw);
-    console.log(parsed);
-    return plannerAgentSchema.parse(parsed);
+    const validated = plannerAgentSchema.parse(parsed);
+
+    if (validated.to === "builder") {
+      const code = await invokeBuilderAgent(validated.message);
+      return code;
+    }
+
+    return validated;
   } catch (err) {
     console.error("Invalid structured output:", raw);
     throw new Error("Planner agent returned invalid structured output");

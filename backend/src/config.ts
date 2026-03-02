@@ -10,4 +10,5 @@ function requireEnv(name: string): string {
 }
 
 export const GEMINI_KEY = requireEnv("GEMINI_KEY");
-
+export const SUPABASE_URL = requireEnv("SUPABASE_URL");
+export const SUPABASE_ANON_KEY = requireEnv("SUPABASE_ANON_KEY");

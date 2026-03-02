@@ -100,3 +100,47 @@ The JSON format must be like this:
 
 
 // To do: Enforce structured output to all agents
+// keep a phase variable in backend/DB : indicates planning and building phase
+
+# Supabase SQL
+
+## Create user table
+```sql
+create table public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text unique,
+  created_at timestamp default now()
+);
+```
+
+## Auto inject username and email to User's table :
+```sql
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, username)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'username'
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+```
+
+## Enable row level security
+```sql
+alter table public.profiles enable row level security;
+```
+
+## Allow users to read their own profile
+```sql
+create policy "Users can view their own profile"
+on public.profiles
+for select
+using (auth.uid() = id);
+```

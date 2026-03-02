@@ -1,12 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send } from "lucide-react";
+
+import sendUserQuery from "@/api/postMessage";
 
 type Sender = "user" | "assistant";
 
@@ -20,41 +20,45 @@ type Message = {
 type Messages = Message[];
 
 export const ChatWindow = () => {
-  const [msgList, setMsgHistory] = useState<Messages>([
-    {
-      id: "1",
-      sender: "user",
-      content: "Hello",
-      createdAt: Date.now(),
-    },
-    {
-      id: "2",
-      sender: "assistant",
-      content: "Hi User! How can I help you today?",
-      createdAt: Date.now() + 1,
-    },
-    {
-      id: "3",
-      sender: "user",
-      content: "Nice to meet ya",
-      createdAt: Date.now() + 2,
-    },
-  ]);
+  function renderCode(code: string) {
+    console.log("Rendering .....", code);
+  }
+  const [msgList, setMsgHistory] = useState<Messages>([]);
 
   const [inputValue, setInputValue] = useState("");
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       sender: "user",
       content: inputValue,
       createdAt: Date.now(),
     };
 
-    setMsgHistory([...msgList, newMessage]);
+    setMsgHistory((prev) => [...prev, userMessage]);
     setInputValue("");
+
+    try {
+      const llmResponse = await sendUserQuery(inputValue);
+
+      if (llmResponse.response.to === "builder") {
+        renderCode(llmResponse.response.message);
+        return;
+      }
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        content: llmResponse.response.message,
+        createdAt: Date.now(),
+      };
+
+      setMsgHistory((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   const formatTime = (timestamp: number) => {
@@ -72,35 +76,37 @@ export const ChatWindow = () => {
       {/* Messages Area */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4">
-        {msgList.map((msg, index) => (
-          <div key={msg.id}>
-            <div
-              className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}
-            >
-              {/* Message Bubble */}
+          {msgList.map((msg, index) => (
+            <div key={msg.id}>
               <div
-                className={`flex flex-col max-w-[70%] ${msg.sender === "user" ? "items-end" : ""}`}
+                className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}
               >
+                {/* Message Bubble */}
                 <div
-                  className={`rounded-lg px-3 py-2 ${
-                    msg.sender === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
+                  className={`flex flex-col max-w-[70%] ${msg.sender === "user" ? "items-end" : ""}`}
                 >
-                  <p className="text-sm max-w-[280px] break-words">{msg.content}</p>
+                  <div
+                    className={`rounded-lg px-3 py-2 ${
+                      msg.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <p className="text-sm max-w-[280px] break-words">
+                      {msg.content}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {formatTime(msg.createdAt)}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground mt-1">
-                  {formatTime(msg.createdAt)}
-                </span>
               </div>
+
+              {/* Separator between messages */}
+
+              <Separator className="my-3 opacity-50" />
             </div>
-
-            {/* Separator between messages */}
-
-            <Separator className="my-3 opacity-50" />
-          </div>
-        ))}
+          ))}
         </div>
       </ScrollArea>
 

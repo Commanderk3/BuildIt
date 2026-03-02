@@ -6,10 +6,10 @@ export default function Inspector() {
   return (
     <div
       style={{
-        width: 260,
         padding: 16,
-        borderLeft: "1px solid #ddd",
+        borderLeft: "1px solid #969696",
         fontFamily: "sans-serif",
+        color: "black"
       }}
     >
       <h3>🎯 Inspector</h3>
@@ -30,6 +30,7 @@ export default function Inspector() {
             </label>
             <input
               type="text"
+              value={selected.text}
               placeholder="Edit text"
               style={{ width: "100%", padding: "4px 8px" }}
               onChange={(e) => updateCodeText(e.target.value)}
@@ -69,16 +70,15 @@ export default function Inspector() {
             <div style={{ display: "flex", gap: "8px" }}>
               <input
                 type="color"
-                value={selected.style.color ?? ""}
+                value={selected.style.color ?? "#000000"}
                 style={{ width: "40px", height: "30px" }}
-                readOnly
                 onChange={(e) => updateStyle("color", e.target.value)}
               />
               <input
                 type="text"
                 value={selected.style.color ?? ""}
-                placeholder={selected.style.color}
                 style={{ flex: 1, padding: "4px 8px" }}
+                onChange={(e) => updateStyle("color", e.target.value)}
               />
             </div>
           </div>

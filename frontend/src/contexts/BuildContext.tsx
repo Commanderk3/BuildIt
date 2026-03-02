@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import { testFile, testFile2, testFile3 } from "@/constants/testFileString";
+import { testFile, testFile2, testFile5 } from "@/constants/testFileString";
 import updateCode from "@/lib/ast/updateCode";
 
 // Type definitions
@@ -9,6 +9,7 @@ export type SelectedElement = {
   nodeId: string;
   className: string;
   style: React.CSSProperties;
+  text: string;
 } | null;
 
 export type Files = {
@@ -50,7 +51,7 @@ export function BuildProvider({ children }: BuildProviderProps) {
   const updateCodeText = (value: string): void => {};
 
   const updateStyle = (property: string, value: string): void => {
-    // add debounce
+    // FEAT: add debounce
     console.log(property, value);
     const newFiles= updateCode(property, value, injectedFiles, nodeMap, selected);
     setInjectedFiles(newFiles);

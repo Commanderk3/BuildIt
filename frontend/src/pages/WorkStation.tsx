@@ -44,7 +44,6 @@ export default function WorkStation() {
   useEffect(() => {
     if (mode !== "inspector") return;
     const result = injectNodeIdsIntoTsx(files);
-
     setInjectedFiles(result.files);
     setNodeMap(result.map);
   }, [mode]);

@@ -6,3 +6,13 @@
     --foreground: 222.2 84% 4.9%;
   }
 }
+/* Force Sandpack wrapper to take full width */
+.sp-wrapper {
+  display: flex;
+  width: 100% !important;
+  
+}
+
+.sp-preview {
+  height: 100% !important;
+} 

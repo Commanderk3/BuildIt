@@ -12,6 +12,7 @@
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
     "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.13.5",
     "chroma-js": "^3.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
