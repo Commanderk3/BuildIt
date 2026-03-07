@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Send } from "lucide-react";
 
-import sendUserQuery from "@/api/postMessage";
+import { sendUserQuery } from "@/api/postMessage";
+import { useBuild } from "@/contexts/BuildContext";
 
 type Sender = "user" | "assistant";
 
@@ -20,6 +21,8 @@ type Message = {
 type Messages = Message[];
 
 export const ChatWindow = () => {
+
+  const { projectId } = useBuild();
   function renderCode(code: string) {
     console.log("Rendering .....", code);
   }
@@ -41,23 +44,25 @@ export const ChatWindow = () => {
     setInputValue("");
 
     try {
-      const llmResponse = await sendUserQuery(inputValue);
+      const llmResponse = await sendUserQuery(inputValue, projectId);
 
-      if (llmResponse.response.to === "builder") {
-        renderCode(llmResponse.response.message);
+      if (llmResponse.to === "builder") {
+        renderCode(llmResponse.message);
         return;
       }
+
+      console.log("AI", llmResponse, llmResponse.message);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        content: llmResponse.response.message,
+        content: llmResponse.message,
         createdAt: Date.now(),
       };
 
       setMsgHistory((prev) => [...prev, botMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } catch (error: any) {
+      console.error(error);
     }
   };
 

@@ -6,12 +6,32 @@ import SandpackWindow from "../components/SandpackWindow";
 import { getStylesOfNode } from "../lib/getStyle";
 import { injectNodeIdsIntoTsx } from "@/lib/ast/parser";
 import { ChatWindow } from "@/components/Chat/ChatWindow";
+import { Trash2 } from "lucide-react";
 
+import { deleteProject } from "@/api/postMessage";
+import { useNavigate } from "react-router-dom";
 type Mode = "preview" | "code_editor" | "inspector";
 
 export default function WorkStation() {
-  const { setSelected, setInjectedFiles, setNodeMap, files } = useBuild();
+  const { setSelected, setInjectedFiles, setNodeMap, projectId, files } =
+    useBuild();
+
+  const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("preview");
+
+  const handleDeleteProject = async () => {
+    if (!projectId) return;
+
+    const confirmed = confirm("Delete this project?");
+    if (!confirmed) return;
+
+    try {
+      await deleteProject(projectId);
+      navigate("/projects");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -75,6 +95,14 @@ export default function WorkStation() {
             onClick={() => setMode("inspector")}
           >
             Inspector
+          </Button>
+
+          <Button
+            size="icon"
+            variant="destructive"
+            onClick={handleDeleteProject}
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
 

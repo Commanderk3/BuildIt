@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { testFile, testFile2, testFile5 } from "@/constants/testFileString";
 import updateCode from "@/lib/ast/updateCode";
 
-// Type definitions
 export type SelectedElement = {
   tag: string;
   nodeId: string;
@@ -24,10 +23,12 @@ type BuildContextType = {
   updateFiles: (newFiles: Files) => void;
   files: Files;
   injectedFiles: Files;
+  projectId: string;
   setInjectedFiles: React.Dispatch<React.SetStateAction<Files>>;
   selected: SelectedElement;
   setSelected: React.Dispatch<React.SetStateAction<SelectedElement>>;
   setNodeMap: React.Dispatch<React.SetStateAction<NodeMap>>;
+  loadProject: (projectId: string) => void;
 };
 
 const BuildContext = createContext<BuildContextType | null>(null);
@@ -40,9 +41,16 @@ export function BuildProvider({ children }: BuildProviderProps) {
   const [selected, setSelected] = useState<SelectedElement>(null);
   const [files, setFiles] = useState<Files>(testFile2);
   const [injectedFiles, setInjectedFiles] = useState<Files>({});
+  const [projectId, setProjectId] = useState("");
   const [nodeMap, setNodeMap] = useState<
     Record<string, { from: number; to: number }>
   >({});
+
+  const loadProject = (projectId: string) => {
+    setProjectId(projectId);
+    // pull code from github and convert it to Files
+    setFiles(testFile2);
+  }
 
   const updateFiles = (newFiles: Files): void => {
     setFiles(newFiles);
@@ -64,6 +72,8 @@ export function BuildProvider({ children }: BuildProviderProps) {
     selected,
     files,
     injectedFiles,
+    projectId,
+    loadProject,
     setInjectedFiles,
     setSelected,
     setNodeMap,

@@ -9,6 +9,8 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export const GEMINI_KEY = requireEnv("GEMINI_KEY");
-export const SUPABASE_URL = requireEnv("SUPABASE_URL");
-export const SUPABASE_ANON_KEY = requireEnv("SUPABASE_ANON_KEY");
+const GEMINI_KEY = requireEnv("GEMINI_KEY");
+const JWT_SECRET= requireEnv("JWT_SECRET");
+const MONGO_URI = requireEnv("MONGO_URI");
+
+export { GEMINI_KEY, JWT_SECRET, MONGO_URI }

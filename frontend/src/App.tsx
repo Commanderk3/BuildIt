@@ -1,26 +1,39 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import SignupPage from "./pages/signup";
+import { AuthPage } from "./pages/Auth";
 import HomePage from "./pages/Home";
+import ProjectsPage from "./pages/Projects";
 import WorkStation from "./pages/WorkStation";
+import { Toaster } from "@/components/ui/sonner";
 
-// contexts
 import { BuildProvider } from "./contexts/BuildContext";
+import { UserProvider } from "./contexts/UserContext";
 
 export function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route 
-          path="/work" 
-          element={
-            <BuildProvider>
-              <WorkStation />
-            </BuildProvider>
-          } 
-        />
-      </Routes>
+      <UserProvider>
+        <Toaster position="top-right" />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/onboard" element={<AuthPage />} />
+          <Route
+            path="/projects"
+            element={
+              <BuildProvider>
+                <ProjectsPage />
+              </BuildProvider>
+            }
+          />
+          <Route
+            path="/work"
+            element={
+              <BuildProvider>
+                <WorkStation />
+              </BuildProvider>
+            }
+          />
+        </Routes>
+      </UserProvider>
     </BrowserRouter>
   );
 }
