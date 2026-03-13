@@ -1,26 +1,50 @@
 import axios from "axios";
 
+type LlmResponse =
+  | {
+      to: "user";
+      message: string;
+    }
+  | {
+      to: "builder";
+      message: string;
+      projectName: string;
+      description: string;
+    };
+    
 type ApiResponse = {
-  llmResponse: {
-    to: string;
-    message: string;
-  };
+  project: Project;
+  llmResponse: LlmResponse;
+};
+
+type Project = {
+  projectId: string;
+  title: string;
+  description: string;
+  mode: string;
 };
 
 type DeleteResponse = {
   message: string;
 };
 
+type Message = {
+  id: string;
+  sender: "user" | "assistant";
+  content: string;
+  createdAt: number;
+};
+
 const API = "http://localhost:3000/project";
 
-async function sendNewProjectQuery(query: string) {
+async function sendNewProjectQuery(messages: Message[]) {
   try {
     const token = localStorage.getItem("token");
     console.log(token);
 
     const res = await axios.post<ApiResponse>(
       `${API}/newProject`,
-      { data: query },
+      { messages }, // send messages array
       {
         headers: {
           "Content-Type": "application/json",
@@ -38,13 +62,13 @@ async function sendNewProjectQuery(query: string) {
   }
 }
 
-async function sendUserQuery(query: string, projectId: string) {
+async function sendUserQuery(msgList: Message[], projectId: string) {
   try {
     const token = localStorage.getItem("token");
 
     const res = await axios.post<ApiResponse>(
       `${API}/ask/${projectId}`,
-      { data: query },
+      { messages: msgList },
       {
         headers: {
           "Content-Type": "application/json",

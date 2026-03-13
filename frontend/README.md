@@ -84,3 +84,4 @@ npx shadcn@latest add button
 - Add stronger type guards around cross-window message payloads in WorkStation event handling.
 - Define and document the backend chat persistence + streaming contract before wiring full frontend integration.
 
+- Message slide show in prompt box

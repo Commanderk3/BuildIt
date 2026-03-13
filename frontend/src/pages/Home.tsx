@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { motion } from "motion/react";
 
@@ -34,7 +33,7 @@ export default function HomePage() {
                 {/* Description */}
                 <p className="text-lg text-muted-foreground/80 mb-10 max-w-xl leading-relaxed">
                   Create breathtaking images with AI that understands your
-                  vision. No design skills needed—just describe what you imagine
+                  vision. No coding just describe what you imagine
                   and watch it come to life.
                 </p>
 
@@ -45,14 +44,6 @@ export default function HomePage() {
                     className="h-12 px-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     Try for free
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="ghost"
-                    className="h-12 px-8 rounded-full text-muted-foreground hover:text-foreground"
-                  >
-                    Read Documentation
-                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
 

@@ -2,8 +2,6 @@ import User from "../models/User.js";
 import Chat from "../models/Chat.js";
 
 async function createNewProject(userId: string, projectId: string) {
-  
-
   const project = {
     projectId,
     title: "New Project",
@@ -24,34 +22,37 @@ async function createNewProject(userId: string, projectId: string) {
 }
 
 async function updateChatHistory(
-  userId: string, 
+  userId: string,
   projectId: string,
-  userQuery: string, 
-  responseText: string
+  userQuery: string,
+  responseText: string,
 ) {
   try {
-
     const chat = await Chat.findOneAndUpdate(
-      { 
-        userId, 
-        projectId
+      {
+        userId,
+        projectId,
       },
       {
         $push: {
           messages: {
             $each: [
               { sender: "user", content: userQuery, createdAt: Date.now() },
-              { sender: "assistant", content: responseText, createdAt: Date.now() }
-            ]
-          }
-        }
+              {
+                sender: "assistant",
+                content: responseText,
+                createdAt: Date.now(),
+              },
+            ],
+          },
+        },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-    
+
     return chat;
   } catch (error) {
-    console.error('Error updating chat history:', error);
+    console.error("Error updating chat history:", error);
     throw error;
   }
 }

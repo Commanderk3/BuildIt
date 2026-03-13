@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
+import SandpackWindow from "../components/SandpackWindow";
 import { Button } from "@/components/ui/button";
 
 import { useBuild } from "@/contexts/BuildContext";
-import SandpackWindow from "../components/SandpackWindow";
 import { getStylesOfNode } from "../lib/getStyle";
-import { injectNodeIdsIntoTsx } from "@/lib/ast/parser";
+import { injectNodeIdsIntoTsx, addInspectorImport } from "@/lib/ast/parser";
+import { downloadProject } from "@/lib/generateProject";
 import { ChatWindow } from "@/components/Chat/ChatWindow";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowDownToLine } from "lucide-react";
 
 import { deleteProject } from "@/api/postMessage";
 import { useNavigate } from "react-router-dom";
+
 type Mode = "preview" | "code_editor" | "inspector";
 
 export default function WorkStation() {
-  const { setSelected, setInjectedFiles, setNodeMap, projectId, files } =
+  const { setSelected, setInjectedFiles, setNodeMap, projectId, title, files } =
     useBuild();
 
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ export default function WorkStation() {
 
     try {
       await deleteProject(projectId);
+      localStorage.removeItem(`chat_${projectId}`);
       navigate("/projects");
     } catch (error) {
       console.error(error);
@@ -64,7 +67,8 @@ export default function WorkStation() {
   useEffect(() => {
     if (mode !== "inspector") return;
     const result = injectNodeIdsIntoTsx(files);
-    setInjectedFiles(result.files);
+    const inspectorCode = addInspectorImport(result.files);
+    setInjectedFiles(inspectorCode);
     setNodeMap(result.map);
   }, [mode]);
 
@@ -72,38 +76,54 @@ export default function WorkStation() {
     <div className="flex overflow-hidden">
       <div className="flex flex-1 flex-col">
         {/* Toolbar */}
-        <div className="flex justify-end gap-2 border-b p-2">
-          <Button
-            size="sm"
-            variant={mode === "preview" ? "default" : "outline"}
-            onClick={() => setMode("preview")}
-          >
-            Preview
-          </Button>
+        <div className="flex items-center justify-between border-b p-2">
+          {/* Title on the left */}
+          <h2 className="text-lg font-semibold">{title}</h2>
 
-          <Button
-            size="sm"
-            variant={mode === "code_editor" ? "default" : "outline"}
-            onClick={() => setMode("code_editor")}
-          >
-            Code
-          </Button>
+          {/* Buttons on the right */}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={mode === "preview" ? "default" : "outline"}
+              onClick={() => setMode("preview")}
+            >
+              Preview
+            </Button>
 
-          <Button
-            size="sm"
-            variant={mode === "inspector" ? "default" : "outline"}
-            onClick={() => setMode("inspector")}
-          >
-            Inspector
-          </Button>
+            <Button
+              size="sm"
+              variant={mode === "code_editor" ? "default" : "outline"}
+              onClick={() => setMode("code_editor")}
+            >
+              Code
+            </Button>
 
-          <Button
-            size="icon"
-            variant="destructive"
-            onClick={handleDeleteProject}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            <Button
+              size="sm"
+              variant={mode === "inspector" ? "default" : "outline"}
+              onClick={() => setMode("inspector")}
+            >
+              Inspector
+            </Button>
+
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => {
+                downloadProject(files);
+              }}
+            >
+              <ArrowDownToLine className="h-4 w-4" />
+            </Button>
+
+            <Button
+              size="icon"
+              variant="destructive"
+              onClick={handleDeleteProject}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Sandpack */}

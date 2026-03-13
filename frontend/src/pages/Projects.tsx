@@ -1,25 +1,32 @@
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Plus, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { Sidebar } from "@/components/Sidebar";
+import { PromptBox } from "@/components/PromptBox";
 
 import { sendNewProjectQuery } from "@/api/postMessage";
 import { getUserDetails } from "@/api/getUser";
 
 import { useUser } from "../contexts/UserContext";
+import { useBuild } from "@/contexts/BuildContext";
+
+type Message = {
+  id: string;
+  sender: "user" | "assistant";
+  content: string;
+  createdAt: number;
+};
 
 export default function ProjectsPage() {
-  const navigate = useNavigate();
-  const { username, setUser, clearUser } = useUser();
-
-  const [prompt, setPrompt] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { username, setUser, clearUser } = useUser();
+  const { loadProject, renderCode, updateTitle } = useBuild();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -42,8 +49,6 @@ export default function ProjectsPage() {
         setUser(user);
       } catch (error) {
         console.error(error);
-        localStorage.removeItem("token");
-        clearUser();
         navigate("/onboard");
       } finally {
         setLoading(false);
@@ -53,15 +58,48 @@ export default function ProjectsPage() {
     fetchUser();
   }, [navigate, setUser, clearUser, username]); // Added username to dependencies
 
-  const handleCreateProject = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleCreateProject = async (prompt: string) => {
     if (!prompt.trim()) return;
 
     try {
-      await sendNewProjectQuery(prompt);
-      // load llm response in chatbot
+      const userMessage: Message[] = [
+        {
+          id: Date.now().toString(),
+          sender: "user",
+          content: prompt,
+          createdAt: Date.now(),
+        },
+      ];
+
+      const res = await sendNewProjectQuery(userMessage);
+
+      const { project, llmResponse } = res;
+
+      loadProject(project.projectId, false);
+
+      if (llmResponse.to === "user") {
+        const chatHistory: Message[] = [
+          userMessage[0],
+          {
+            id: (Date.now() + 1).toString(),
+            sender: "assistant",
+            content: llmResponse.message,
+            createdAt: Date.now(),
+          },
+        ];
+
+        localStorage.setItem(
+          `chat_${project.projectId}`,
+          JSON.stringify(chatHistory),
+        );
+
+      } else if (llmResponse.to === "builder") {
+        updateTitle(llmResponse.projectName, llmResponse.description);
+        renderCode(llmResponse.message);
+      }
       navigate("/work");
+
+
     } catch (error: unknown) {
       console.error(error);
       localStorage.removeItem("token");
@@ -124,26 +162,7 @@ export default function ProjectsPage() {
                   </p>
                 </div>
 
-                <form onSubmit={handleCreateProject} className="space-y-4">
-                  <div className="relative">
-                    <Input
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="Describe what you want to build..."
-                      className="pr-20 py-6 text-lg pl-6 rounded-full border-2 focus-visible:ring-2 focus-visible:ring-primary"
-                    />
-
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="absolute right-1 top-1 rounded-full px-6"
-                      disabled={!prompt.trim()}
-                    >
-                      <Plus className="mr-2 h-5 w-5" />
-                      Create
-                    </Button>
-                  </div>
-                </form>
+                <PromptBox handleCreateProject={handleCreateProject} />
 
                 <div className="text-center text-sm text-muted-foreground">
                   <p>

@@ -1,53 +1,62 @@
-import { GoogleGenAI } from "@google/genai";
-import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
-import { GEMINI_KEY } from "../config.js";
-import { PLANNER_AGENT_PROMPT } from "../constants/prompts.js";
 import invokeBuilderAgent from "../agents/builder.js";
+import { invokePlannerAgent } from "../agents/planner.js";
 
-const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+interface Message {
+  sender: "user" | "assistant";
+  content: string;
+  createdAt: number;
+}
 
-async function generateResponse(userQuery: string) {
-  const plannerAgentSchema = z.object({
-    message: z
-      .string()
-      .describe("Your answer to user query or plans for builder agent"),
-    to: z
-      .enum(["user", "builder"])
-      .describe("Target recipient of this message"),
-  });
+type LlmResponse =
+  | {
+      to: "user";
+      message: string;
+    }
+  | {
+      to: "builder";
+      message: string;
+      projectName: string;
+      description: string;
+    };
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: userQuery }],
-      },
-    ],
-    config: {
-      systemInstruction: PLANNER_AGENT_PROMPT,
-      temperature: 0.2,
-      responseMimeType: "application/json",
-      responseJsonSchema: zodToJsonSchema(plannerAgentSchema),
-    },
-  });
-
-  const raw = response.text ?? "";
-
+async function generateResponse(msgList: Message[]): Promise<LlmResponse> {
   try {
-    const parsed = JSON.parse(raw);
-    const validated = plannerAgentSchema.parse(parsed);
+    const parsedResponse = await invokePlannerAgent(msgList);
+    console.log("Planner response:", parsedResponse);
 
-    if (validated.to === "builder") {
-      const code = await invokeBuilderAgent(validated.message);
-      return code;
+    if (parsedResponse.to === "builder") {
+      console.log(
+        "Calling builder with plans:",
+        parsedResponse.message.substring(0, 200) + "...",
+      );
+
+      const code = await invokeBuilderAgent(parsedResponse.message);
+      // console.log("Builder response received:", code ? "Success" : "Failed");
+
+      if (!code || !code.files) {
+        throw new Error("No code received from builder");
+      }
+
+      const { projectName, description } = parsedResponse;
+
+      return {
+        to: "builder",
+        message: JSON.stringify(code),
+        projectName,
+        description,
+      };
     }
 
-    return validated;
+    return parsedResponse;
   } catch (err) {
-    console.error("Invalid structured output:", raw);
-    throw new Error("Planner agent returned invalid structured output");
+    console.error("Generate response error:", err);
+
+    // Return a user-friendly error message
+    return {
+      to: "user",
+      message:
+        "I encountered an error while building your project. Please try again with a more specific request.",
+    };
   }
 }
 

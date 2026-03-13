@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
@@ -21,11 +22,8 @@ type Message = {
 type Messages = Message[];
 
 export const ChatWindow = () => {
+  const { projectId, updateTitle, renderCode } = useBuild();
 
-  const { projectId } = useBuild();
-  function renderCode(code: string) {
-    console.log("Rendering .....", code);
-  }
   const [msgList, setMsgHistory] = useState<Messages>([]);
 
   const [inputValue, setInputValue] = useState("");
@@ -44,14 +42,14 @@ export const ChatWindow = () => {
     setInputValue("");
 
     try {
-      const llmResponse = await sendUserQuery(inputValue, projectId);
+      const updatedHistory = [...msgList, userMessage];
+      const llmResponse = await sendUserQuery(updatedHistory, projectId);
 
       if (llmResponse.to === "builder") {
+        updateTitle(llmResponse.projectName, llmResponse.description);
         renderCode(llmResponse.message);
         return;
       }
-
-      console.log("AI", llmResponse, llmResponse.message);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -65,6 +63,23 @@ export const ChatWindow = () => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+
+    if (!projectId) return;
+
+    const storedMessages = localStorage.getItem(`chat_${projectId}`);
+
+    if (storedMessages) {
+      setMsgHistory(JSON.parse(storedMessages));
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    localStorage.setItem(`chat_${projectId}`, JSON.stringify(msgList));
+  }, [msgList, projectId]);
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString([], {

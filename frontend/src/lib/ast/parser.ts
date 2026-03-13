@@ -1,3 +1,4 @@
+import { inspectorCode } from "@/constants/inspectorCode";
 import { Project, Node } from "ts-morph";
 
 export type RangeMap = Record<
@@ -101,4 +102,20 @@ export function removeNodeIdsFromTsx(filePath: string, code: string): string {
   });
 
   return sourceFile.getText();
+}
+
+export function addInspectorImport(files: Record<string, string>) {
+  const newFiles = { ...files };
+
+  newFiles["/__inspector.ts"] = inspectorCode;
+
+  const path = "/index.tsx";
+  const importLine = `import "./__inspector";\n`;
+
+  if (!newFiles[path]) return newFiles;
+  if (!newFiles[path].includes(`"./__inspector"`)) {
+    newFiles[path] = importLine + newFiles[path];
+  }
+
+  return newFiles;
 }

@@ -68,7 +68,7 @@ export default function SandpackWindow({ mode }: SandpackWindowProps) {
           <div
             className={`${mode === "inspector" ? "w-3/4" : "w-full"} transition-all duration-300 overflow-hidden flex-shrink-0`}
           >
-            <SandpackPreview style={{ height: "90vh" }} />
+            <SandpackPreview showNavigator={true} style={{ height: "100vh" }} />
           </div>
 
           <div

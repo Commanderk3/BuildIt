@@ -19,19 +19,34 @@ router.post("/newProject", async (req: AuthRequest, res: Response) => {
   try {
     const projectId = randomUUID();
     const userId = req.user?.id;
+
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const userQuery = req.body?.data;
-    const llmResponse = await generateResponse(userQuery);
-    const responseText =
-      typeof llmResponse === "string" ? llmResponse : llmResponse.message;
-    await updateChatHistory(userId, projectId, userQuery, responseText);
+    const messages = req.body?.messages;
+
+    if (!Array.isArray(messages)) {
+      return res.status(400).json({ message: "Invalid messages payload" });
+    }
+
+    // Limit chat history sent to LLM
+    const trimmedMessages = messages.slice(-12);
+
+    const llmResponse = await generateResponse(trimmedMessages);
+
+    // Create project
     const project = await createNewProject(userId, projectId);
 
-    return res.status(200).json({ project });
+    return res.status(200).json({
+      project,
+      llmResponse: {
+        message: llmResponse.message,
+        to: llmResponse.to,
+      },
+    });
   } catch (error) {
+    console.error("Error in /newProject:", error);
     return res.status(500).json({ message: "Server error" });
   }
 });
@@ -40,7 +55,7 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
   try {
     const { projectId } = req.params;
     const userId = req.user?.id;
-    const userQuery = req.body?.data;
+    const messages = req.body?.messages;
 
     if (!projectId || typeof projectId !== "string") {
       return res.status(400).json({ message: "Project ID invalid" });
@@ -50,8 +65,8 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!userQuery || typeof userQuery !== "string") {
-      return res.status(400).json({ message: "Invalid query payload" });
+    if (!Array.isArray(messages)) {
+      return res.status(400).json({ message: "Invalid messages payload" });
     }
 
     const user = await User.findById(userId);
@@ -64,10 +79,7 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    const llmResponse = { message: "Hello", to: "user" }; // await generateResponse(userQuery);
-    const responseText = typeof llmResponse === "string" ? llmResponse : llmResponse.message;
-
-    await updateChatHistory(userId, projectId, userQuery, responseText);
+    const llmResponse = await generateResponse(messages);
 
     return res.status(200).json({ llmResponse });
   } catch (error) {

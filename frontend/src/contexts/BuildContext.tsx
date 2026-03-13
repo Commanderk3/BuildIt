@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import { testFile, testFile2, testFile5 } from "@/constants/testFileString";
+import { testFile, testFile2 } from "@/constants/testFileString";
+import { addInspectorImport } from "@/lib/ast/parser";
 import updateCode from "@/lib/ast/updateCode";
 
 export type SelectedElement = {
@@ -21,14 +22,17 @@ type BuildContextType = {
   updateCodeText: (value: string) => void;
   updateStyle: (property: string, value: string) => void;
   updateFiles: (newFiles: Files) => void;
+  renderCode: (code: string) => void;
   files: Files;
   injectedFiles: Files;
+  title: string;
+  updateTitle: (title: string, description: string) => void;
   projectId: string;
   setInjectedFiles: React.Dispatch<React.SetStateAction<Files>>;
   selected: SelectedElement;
   setSelected: React.Dispatch<React.SetStateAction<SelectedElement>>;
   setNodeMap: React.Dispatch<React.SetStateAction<NodeMap>>;
-  loadProject: (projectId: string) => void;
+  loadProject: (projectId: string, pullCode: boolean) => void;
 };
 
 const BuildContext = createContext<BuildContextType | null>(null);
@@ -42,15 +46,35 @@ export function BuildProvider({ children }: BuildProviderProps) {
   const [files, setFiles] = useState<Files>(testFile2);
   const [injectedFiles, setInjectedFiles] = useState<Files>({});
   const [projectId, setProjectId] = useState("");
+  const [title, setTitle] = useState("");
   const [nodeMap, setNodeMap] = useState<
     Record<string, { from: number; to: number }>
   >({});
 
-  const loadProject = (projectId: string) => {
+  const loadProject = (projectId: string, pullCode: boolean) => {
     setProjectId(projectId);
-    // pull code from github and convert it to Files
-    setFiles(testFile2);
+    if (pullCode) {
+      // pull code from github and convert it to Files
+      // or read text file data
+      setFiles(testFile2);
+    } else {
+      setFiles(testFile2); // default page
+    }
+  };
+
+  const updateTitle = (title: string, description: string) => {
+    setTitle(title);
   }
+
+  const renderCode = (code: string) => {
+    // check if valid structure
+
+    // render code
+    const files = JSON.parse(code);
+    console.log(files);
+    console.log("Rendering .....");
+    setFiles(files.files);
+  };
 
   const updateFiles = (newFiles: Files): void => {
     setFiles(newFiles);
@@ -61,8 +85,15 @@ export function BuildProvider({ children }: BuildProviderProps) {
   const updateStyle = (property: string, value: string): void => {
     // FEAT: add debounce
     console.log(property, value);
-    const newFiles= updateCode(property, value, injectedFiles, nodeMap, selected);
-    setInjectedFiles(newFiles);
+    const newFiles = updateCode(
+      property,
+      value,
+      injectedFiles,
+      nodeMap,
+      selected,
+    );
+    const inspectorCode = addInspectorImport(newFiles);
+    setInjectedFiles(inspectorCode);
   };
 
   const contextValue: BuildContextType = {
@@ -71,12 +102,15 @@ export function BuildProvider({ children }: BuildProviderProps) {
     updateFiles,
     selected,
     files,
+    title,
     injectedFiles,
+    updateTitle,
     projectId,
     loadProject,
     setInjectedFiles,
     setSelected,
     setNodeMap,
+    renderCode,
   };
 
   return (

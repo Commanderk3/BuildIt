@@ -7,12 +7,13 @@ import { useBuild } from "@/contexts/BuildContext";
 
 export const Sidebar = () => {
   const { projects } = useUser();
+  console.log("Sidebar ",projects);
   const navigate = useNavigate();
   const { loadProject } = useBuild();
 
-  const handleLoadProject = (projectId: string) => {
-    loadProject(projectId);
-    navigate("/work")
+  const handleLoadProject = (projectId: string, mode: string) => {
+    loadProject(projectId, mode === "builder");
+    navigate("/work");
   }
 
   return (
@@ -33,7 +34,7 @@ export const Sidebar = () => {
                   key={project._id}
                   variant="ghost"
                   className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-accent/50 transition-colors"
-                  onClick={() => handleLoadProject(project.projectId)}
+                  onClick={() => handleLoadProject(project.projectId, project.mode)}
                 >
                   <div className="flex items-start gap-3">
                     <FileText className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
