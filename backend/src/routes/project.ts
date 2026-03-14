@@ -4,7 +4,7 @@ import generateResponse from "../services/ai.js";
 import User from "../models/User.js";
 import { createNewProject } from "../services/project.service.js";
 import { randomUUID } from "crypto";
-import { updateNameProject, updateChatHistory } from "../services/project.service.js";
+import { updateNameProject } from "../services/project.service.js";
 
 const router = express.Router();
 
@@ -15,43 +15,73 @@ interface AuthRequest extends Request {
   };
 }
 
+
+// Utility Functions
+
+function getUserId(req: AuthRequest, res: Response) {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: "Unauthorized" });
+    return null;
+  }
+  return userId;
+}
+
+function validateMessages(messages: any, res: Response) {
+  if (!Array.isArray(messages)) {
+    res.status(400).json({ message: "Invalid messages payload" });
+    return null;
+  }
+  return messages;
+}
+
+function validateProjectId(projectId: any, res: Response) {
+  if (!projectId || typeof projectId !== "string") {
+    res.status(400).json({ message: "Project ID invalid" });
+    return null;
+  }
+  return projectId;
+}
+
+async function getUserProject(userId: string, projectId: string) {
+  const user = await User.findById(userId);
+  if (!user) return { error: "USER_NOT_FOUND" };
+
+  const project = user.projects.find((p) => p.projectId === projectId);
+  if (!project) return { error: "PROJECT_NOT_FOUND" };
+
+  return { user, project };
+}
+
+// Routes
+
 router.post("/newProject", async (req: AuthRequest, res: Response) => {
   try {
+    const userId = getUserId(req, res);
+    if (!userId) return;
+
+    const messages = validateMessages(req.body?.messages, res);
+    if (!messages) return;
+
     const projectId = randomUUID();
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const messages = req.body?.messages;
-
-    if (!Array.isArray(messages)) {
-      return res.status(400).json({ message: "Invalid messages payload" });
-    }
-
-    // Limit chat history sent to LLM
     const trimmedMessages = messages.slice(-12);
 
     const llmResponse = await generateResponse(trimmedMessages);
 
-    // Create project
-    let project = {};
-    if (llmResponse.to === "builder") {
-      project = await createNewProject(
-        userId,
-        projectId,
-        llmResponse.projectName,
-        llmResponse.description,
-      );
-    } else {
-      project = await createNewProject(
-        userId,
-        projectId,
-        "New Project",
-        "Make plans for your project",
-      );
-    }
+    const project =
+      llmResponse.to === "builder"
+        ? await createNewProject(
+            userId,
+            projectId,
+            llmResponse.projectName,
+            llmResponse.description
+          )
+        : await createNewProject(
+            userId,
+            projectId,
+            "New Project",
+            "Make plans for your project"
+          );
 
     return res.status(200).json({
       project,
@@ -68,43 +98,35 @@ router.post("/newProject", async (req: AuthRequest, res: Response) => {
 
 router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
   try {
-    const { projectId } = req.params;
-    const userId = req.user?.id;
-    const messages = req.body?.messages;
+    const userId = getUserId(req, res);
+    if (!userId) return;
 
-    if (!projectId || typeof projectId !== "string") {
-      return res.status(400).json({ message: "Project ID invalid" });
-    }
+    const projectId = validateProjectId(req.params.projectId, res);
+    if (!projectId) return;
 
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    if (!Array.isArray(messages)) {
-      return res.status(400).json({ message: "Invalid messages payload" });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const project = user.projects.find((p) => p.projectId === projectId);
-    if (!project) {
-      return res.status(404).json({ message: "Project not found" });
-    }
+    const messages = validateMessages(req.body?.messages, res);
+    if (!messages) return;
 
     const llmResponse = await generateResponse(messages);
+
     if (llmResponse.to === "builder") {
-      await updateNameProject(
-        userId,
-        projectId,
-        llmResponse.projectName,
-        llmResponse.description,
+      const result = await User.updateOne(
+        { _id: userId, "projects.projectId": projectId },
+        {
+          $set: {
+            "projects.$.name": llmResponse.projectName,
+            "projects.$.description": llmResponse.description,
+          },
+        }
       );
+
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ message: "Project not found" });
+      }
     }
 
     return res.status(200).json({ llmResponse });
+
   } catch (error) {
     console.error("Error in /ask:", error);
     return res.status(500).json({ message: "Server error" });
@@ -113,21 +135,16 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
 
 router.delete("/delete/:projectId", async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
-    const { projectId } = req.params;
+    const userId = getUserId(req, res);
+    if (!userId) return;
 
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    if (!projectId) {
-      return res.status(400).json({ message: "Project ID required" });
-    }
+    const projectId = validateProjectId(req.params.projectId, res);
+    if (!projectId) return;
 
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { projects: { projectId } } },
-      { new: true },
+      { new: true }
     );
 
     if (!user) {
@@ -143,5 +160,10 @@ router.delete("/delete/:projectId", async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+
+// router.post("/push/:projectId", async (req: AuthRequest, res: Response) => {
+//   // check if projectId exist in database
+//   const { user, project } = getUserProject()
+// });
 
 export default router;
