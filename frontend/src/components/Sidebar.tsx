@@ -7,7 +7,6 @@ import { useBuild } from "@/contexts/BuildContext";
 
 export const Sidebar = () => {
   const { projects } = useUser();
-  console.log("Sidebar ",projects);
   const navigate = useNavigate();
   const { loadProject } = useBuild();
 
@@ -17,7 +16,7 @@ export const Sidebar = () => {
   }
 
   return (
-    <div className="w-80 border-r pr-5 bg-muted/10 flex flex-col">
+    <div className="w-80 pr-5 pt-16 bg-muted/10 flex flex-col">
       <div className="p-4">
         <h2 className="font-semibold text-lg mb-4">Projects</h2>
       </div>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { Sidebar } from "@/components/Sidebar";
 import { PromptBox } from "@/components/PromptBox";
+import { NavBar } from "@/components/Navbar";
 
 import { sendNewProjectQuery } from "@/api/postMessage";
 import { getUserDetails } from "@/api/getUser";
@@ -92,14 +93,11 @@ export default function ProjectsPage() {
           `chat_${project.projectId}`,
           JSON.stringify(chatHistory),
         );
-
       } else if (llmResponse.to === "builder") {
-        updateTitle(llmResponse.projectName, llmResponse.description);
+        updateTitle(llmResponse.projectName);
         renderCode(llmResponse.message);
       }
       navigate("/work");
-
-
     } catch (error: unknown) {
       console.error(error);
       localStorage.removeItem("token");
@@ -121,60 +119,64 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      {isSidebarOpen && <Sidebar />}
+    <>
+      <NavBar page={"projects"} />
 
-      <div className="flex-1 flex flex-col relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 left-4 z-10 h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm border shadow-md hover:bg-background/90"
-          onClick={toggleSidebar}
-          aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
-        >
-          {isSidebarOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
+      <div className="flex h-screen bg-background">
+        {isSidebarOpen && <Sidebar />}
 
-        <AuroraBackground>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.3,
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            className="relative flex flex-col items-center justify-center px-4 min-h-screen"
+        <div className="flex-1 flex flex-col relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-[60] h-12 w-6 rounded-r-full rounded-l-none bg-background/80 backdrop-blur-sm border border-l-0 shadow-md hover:bg-background/90 hover:translate-x-0.5 transition-all`}
+            onClick={toggleSidebar}
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
-            <div className="flex-1 flex items-center justify-center p-6">
-              <div className="max-w-2xl w-full space-y-8">
-                <div className="text-center space-y-2">
-                  <h1 className="text-4xl font-bold tracking-tight">
-                    {`Ready to build, ${username}?`}
-                  </h1>
+            {isSidebarOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
 
-                  <p className="text-muted-foreground text-lg">
-                    Ask Builder to create a prototype
-                  </p>
-                </div>
+          <AuroraBackground>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.3,
+                duration: 0.8,
+                ease: "easeInOut",
+              }}
+              className="relative flex flex-col items-center justify-center px-4 min-h-screen"
+            >
+              <div className="flex-1 flex items-center justify-center p-6">
+                <div className="max-w-2xl w-full space-y-8">
+                  <div className="text-center space-y-2">
+                    <h1 className="text-4xl font-bold tracking-tight">
+                      {`Ready to build, ${username}?`}
+                    </h1>
 
-                <PromptBox handleCreateProject={handleCreateProject} />
+                    <p className="text-muted-foreground text-lg">
+                      Ask Builder to create a prototype
+                    </p>
+                  </div>
 
-                <div className="text-center text-sm text-muted-foreground">
-                  <p>
-                    Try: "Create a landing page for my coffee shop" or "Build a
-                    task management app"
-                  </p>
+                  <PromptBox handleCreateProject={handleCreateProject} />
+
+                  <div className="text-center text-sm text-muted-foreground">
+                    <p>
+                      Try: "Create a landing page for my coffee shop" or "Build
+                      a task management app"
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </AuroraBackground>
+            </motion.div>
+          </AuroraBackground>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

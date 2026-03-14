@@ -26,7 +26,7 @@ type BuildContextType = {
   files: Files;
   injectedFiles: Files;
   title: string;
-  updateTitle: (title: string, description: string) => void;
+  updateTitle: (title: string) => void;
   projectId: string;
   setInjectedFiles: React.Dispatch<React.SetStateAction<Files>>;
   selected: SelectedElement;
@@ -62,9 +62,9 @@ export function BuildProvider({ children }: BuildProviderProps) {
     }
   };
 
-  const updateTitle = (title: string, description: string) => {
+  const updateTitle = (title: string) => {
     setTitle(title);
-  }
+  };
 
   const renderCode = (code: string) => {
     // check if valid structure

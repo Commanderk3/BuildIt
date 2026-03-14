@@ -1,11 +1,11 @@
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
 
-async function createNewProject(userId: string, projectId: string) {
+async function createNewProject(userId: string, projectId: string, projectName: string, description: string) {
   const project = {
     projectId,
-    title: "New Project",
-    description: "Make plans for your project",
+    title: projectName,
+    description,
     mode: "planner",
   };
 
@@ -56,4 +56,40 @@ async function updateChatHistory(
     throw error;
   }
 }
-export { createNewProject, updateChatHistory };
+
+async function updateNameProject(
+  userId: string,
+  projectId: string,
+  newTitle: string,
+  newDescription: string
+) {
+  try {
+    const result = await User.updateOne(
+      { 
+        _id: userId, 
+        "projects.projectId": projectId 
+      },
+      { 
+        $set: { 
+          "projects.$.title": newTitle,
+          "projects.$.description": newDescription 
+        } 
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new Error("User or project not found");
+    }
+
+    if (result.modifiedCount === 0) {
+      console.log("Project found but no changes were made");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error updating project:", error);
+    throw error;
+  }
+}
+
+export { createNewProject, updateNameProject, updateChatHistory };

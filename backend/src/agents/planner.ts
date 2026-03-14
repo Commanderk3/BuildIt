@@ -3,7 +3,6 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_KEY } from "../config.js";
 import { PLANNER_AGENT_PROMPT } from "../constants/prompts.js";
-import { error } from "node:console";
 
 interface Message {
   sender: "user" | "assistant";

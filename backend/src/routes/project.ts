@@ -4,7 +4,7 @@ import generateResponse from "../services/ai.js";
 import User from "../models/User.js";
 import { createNewProject } from "../services/project.service.js";
 import { randomUUID } from "crypto";
-import { updateChatHistory } from "../services/project.service.js";
+import { updateNameProject, updateChatHistory } from "../services/project.service.js";
 
 const router = express.Router();
 
@@ -36,7 +36,22 @@ router.post("/newProject", async (req: AuthRequest, res: Response) => {
     const llmResponse = await generateResponse(trimmedMessages);
 
     // Create project
-    const project = await createNewProject(userId, projectId);
+    let project = {};
+    if (llmResponse.to === "builder") {
+      project = await createNewProject(
+        userId,
+        projectId,
+        llmResponse.projectName,
+        llmResponse.description,
+      );
+    } else {
+      project = await createNewProject(
+        userId,
+        projectId,
+        "New Project",
+        "Make plans for your project",
+      );
+    }
 
     return res.status(200).json({
       project,
@@ -80,6 +95,14 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
     }
 
     const llmResponse = await generateResponse(messages);
+    if (llmResponse.to === "builder") {
+      await updateNameProject(
+        userId,
+        projectId,
+        llmResponse.projectName,
+        llmResponse.description,
+      );
+    }
 
     return res.status(200).json({ llmResponse });
   } catch (error) {

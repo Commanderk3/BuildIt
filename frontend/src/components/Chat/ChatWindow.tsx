@@ -46,7 +46,7 @@ export const ChatWindow = () => {
       const llmResponse = await sendUserQuery(updatedHistory, projectId);
 
       if (llmResponse.to === "builder") {
-        updateTitle(llmResponse.projectName, llmResponse.description);
+        updateTitle(llmResponse.projectName);
         renderCode(llmResponse.message);
         return;
       }

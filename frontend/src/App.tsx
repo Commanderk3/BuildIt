@@ -7,11 +7,13 @@ import { Toaster } from "@/components/ui/sonner";
 
 import { BuildProvider } from "./contexts/BuildContext";
 import { UserProvider } from "./contexts/UserContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 export function App() {
   return (
     <BrowserRouter>
       <UserProvider>
+        <ThemeProvider defaultTheme="light">
         <Toaster position="top-right" />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -33,6 +35,7 @@ export function App() {
             }
           />
         </Routes>
+        </ThemeProvider>
       </UserProvider>
     </BrowserRouter>
   );
