@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Send } from "lucide-react";
+import TextareaAutosize from "react-textarea-autosize"
 
 import { sendUserQuery } from "@/api/postMessage";
 import { useBuild } from "@/contexts/BuildContext";
@@ -65,7 +65,6 @@ export const ChatWindow = () => {
   };
 
   useEffect(() => {
-
     if (!projectId) return;
 
     const storedMessages = localStorage.getItem(`chat_${projectId}`);
@@ -135,17 +134,30 @@ export const ChatWindow = () => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSendMessage();
+            if (inputValue.trim()) handleSendMessage();
           }}
-          className="flex gap-2"
+          className="flex items-end gap-2 max-w-4xl mx-auto"
         >
-          <Input
+          <TextareaAutosize
+            maxRows={5}
             placeholder="Type your message..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            // Using shadcn's default textarea classes for a consistent look
+            className="flex min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
           />
-          <Button type="submit" size="icon" disabled={!inputValue.trim()}>
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!inputValue.trim()}
+            className="shrink-0 mb-0.5"
+          >
             <Send className="w-4 h-4" />
           </Button>
         </form>

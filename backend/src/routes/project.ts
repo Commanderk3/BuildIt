@@ -99,21 +99,13 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
     const llmResponse = await generateResponse(messages);
 
     if (llmResponse.to === "builder") {
-      const result = await User.updateOne(
-        { _id: userId, "projects.projectId": projectId },
-        {
-          $set: {
-            "projects.$.name": llmResponse.projectName,
-            "projects.$.description": llmResponse.description,
-          },
-        },
+      updateNameProject(
+        userId,
+        projectId,
+        llmResponse.projectName,
+        llmResponse.description,
       );
-
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ message: "Project not found" });
-      }
     }
-
     return res.status(200).json({ llmResponse });
   } catch (error) {
     console.error("Error in /ask:", error);
@@ -156,7 +148,6 @@ router.post("/push/:projectId", async (req: AuthRequest, res: Response) => {
 
   const projectId = validateProjectId(req.params.projectId, res);
   if (!projectId) return;
-
 });
 
 export default router;

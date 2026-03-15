@@ -73,11 +73,10 @@ export function BuildProvider({ children }: BuildProviderProps) {
   };
 
   const renderCode = (code: string) => { 
-    // render code
     const files: ResponseFiles = JSON.parse(code);
     // check if valid structure
+    // render code
     console.log("Rendering .....", files);
-
     setFiles(files.files);
   };
 
