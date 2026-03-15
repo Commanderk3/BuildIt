@@ -4,6 +4,12 @@ import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useBuild } from "@/contexts/BuildContext";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 export const Sidebar = () => {
   const { projects } = useUser();
@@ -13,7 +19,7 @@ export const Sidebar = () => {
   const handleLoadProject = (projectId: string, mode: string) => {
     loadProject(projectId, mode === "builder");
     navigate("/work");
-  }
+  };
 
   return (
     <div className="w-80 pr-5 pt-16 bg-muted/10 flex flex-col">
@@ -28,26 +34,36 @@ export const Sidebar = () => {
                 No projects yet
               </div>
             ) : (
-              projects.map((project) => (
-                <Button
-                  key={project._id}
-                  variant="ghost"
-                  className="w-full justify-start text-left h-auto py-3 px-3 hover:bg-accent/50 transition-colors"
-                  onClick={() => handleLoadProject(project.projectId, project.mode)}
-                >
-                  <div className="flex items-start gap-3">
-                    <FileText className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">
-                        {project.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                        {project.description}
-                      </div>
-                    </div>
-                  </div>
-                </Button>
-              ))
+              <TooltipProvider>
+                {projects.map((project) => (
+                  <Tooltip key={project._id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-70 justify-start text-left h-auto py-3 px-3 hover:bg-accent/50 transition-colors"
+                        onClick={() =>
+                          handleLoadProject(project.projectId, project.mode)
+                        }
+                      >
+                        <div className="flex items-start gap-3">
+                          <FileText className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">
+                              {project.title}
+                            </div>
+                            <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                              {project.description}
+                            </div>
+                          </div>
+                        </div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side={"left"}>
+                      <p>{project.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </TooltipProvider>
             )}
           </div>
         </ScrollArea>
