@@ -24,7 +24,17 @@ type Messages = Message[];
 export const ChatWindow = () => {
   const { projectId, updateTitle, renderCode } = useBuild();
 
-  const [msgList, setMsgHistory] = useState<Messages>([]);
+  const [msgList, setMsgHistory] = useState<Messages>(() => {
+    if (!projectId) return [];
+    const storedMessages = localStorage.getItem(`chat_${projectId}`);
+    if (!storedMessages) return [];
+    try {
+      const parsed = JSON.parse(storedMessages);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [inputValue, setInputValue] = useState("");
 
@@ -59,20 +69,10 @@ export const ChatWindow = () => {
       };
 
       setMsgHistory((prev) => [...prev, botMessage]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    if (!projectId) return;
-
-    const storedMessages = localStorage.getItem(`chat_${projectId}`);
-
-    if (storedMessages) {
-      setMsgHistory(JSON.parse(storedMessages));
-    }
-  }, [projectId]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -95,7 +95,7 @@ export const ChatWindow = () => {
       {/* Messages Area */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4">
-          {msgList.map((msg, index) => (
+          {msgList.map((msg) => (
             <div key={msg.id}>
               <div
                 className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : ""}`}

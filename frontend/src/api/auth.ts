@@ -68,9 +68,12 @@ const loginUser = async (
     console.log(response);
 
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Login failed";
-    throw new Error(message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message || error.message || "Login failed";
+      throw new Error(message);
+    }
+    throw new Error("Unknown login error");
   }
 };
 
