@@ -41,6 +41,12 @@ type BuildProviderProps = {
   children: ReactNode;
 };
 
+type ResponseFiles = {
+  files: Files;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+}
+
 export function BuildProvider({ children }: BuildProviderProps) {
   const [selected, setSelected] = useState<SelectedElement>(null);
   const [files, setFiles] = useState<Files>(testFile2);
@@ -66,13 +72,12 @@ export function BuildProvider({ children }: BuildProviderProps) {
     setTitle(title);
   };
 
-  const renderCode = (code: string) => {
-    // check if valid structure
-
+  const renderCode = (code: string) => { 
     // render code
-    const files = JSON.parse(code);
-    console.log(files);
-    console.log("Rendering .....");
+    const files: ResponseFiles = JSON.parse(code);
+    // check if valid structure
+    console.log("Rendering .....", files);
+
     setFiles(files.files);
   };
 

@@ -56,10 +56,10 @@ Your job is to convert the given plan into working React code files.
 
 IMPORTANT OUTPUT RULES:
 1. Your response MUST be a valid JSON object.
-2. The keys of the object must be file paths.
-3. The values must be the full source code of the file as a string.
-4. Do NOT include explanations, markdown, or comments outside the JSON.
-5. Make sure image urls work if adding.
+2. The keys of the object must be file paths and value is code in string.
+3. Do NOT include explanations, markdown, or comments outside the JSON.
+4. Make sure image urls work if adding.
+5. You don't have to write package.json
 
 Example format:
 {
@@ -68,7 +68,6 @@ Example format:
 }
 
 Code Rules:
-- Use TypeScript (.tsx).
 - Keep the project simple and runnable. Less code is better.
 - The entry point must be '/index.tsx'.
 - '/App.tsx' must export a default React component.

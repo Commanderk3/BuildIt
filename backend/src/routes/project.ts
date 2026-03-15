@@ -15,7 +15,6 @@ interface AuthRequest extends Request {
   };
 }
 
-
 // Utility Functions
 
 function getUserId(req: AuthRequest, res: Response) {
@@ -43,16 +42,6 @@ function validateProjectId(projectId: any, res: Response) {
   return projectId;
 }
 
-async function getUserProject(userId: string, projectId: string) {
-  const user = await User.findById(userId);
-  if (!user) return { error: "USER_NOT_FOUND" };
-
-  const project = user.projects.find((p) => p.projectId === projectId);
-  if (!project) return { error: "PROJECT_NOT_FOUND" };
-
-  return { user, project };
-}
-
 // Routes
 
 router.post("/newProject", async (req: AuthRequest, res: Response) => {
@@ -74,13 +63,13 @@ router.post("/newProject", async (req: AuthRequest, res: Response) => {
             userId,
             projectId,
             llmResponse.projectName,
-            llmResponse.description
+            llmResponse.description,
           )
         : await createNewProject(
             userId,
             projectId,
             "New Project",
-            "Make plans for your project"
+            "Make plans for your project",
           );
 
     return res.status(200).json({
@@ -117,7 +106,7 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
             "projects.$.name": llmResponse.projectName,
             "projects.$.description": llmResponse.description,
           },
-        }
+        },
       );
 
       if (result.matchedCount === 0) {
@@ -126,7 +115,6 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
     }
 
     return res.status(200).json({ llmResponse });
-
   } catch (error) {
     console.error("Error in /ask:", error);
     return res.status(500).json({ message: "Server error" });
@@ -144,7 +132,7 @@ router.delete("/delete/:projectId", async (req: AuthRequest, res: Response) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { projects: { projectId } } },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {
@@ -161,9 +149,14 @@ router.delete("/delete/:projectId", async (req: AuthRequest, res: Response) => {
   }
 });
 
-// router.post("/push/:projectId", async (req: AuthRequest, res: Response) => {
-//   // check if projectId exist in database
-//   const { user, project } = getUserProject()
-// });
+router.post("/push/:projectId", async (req: AuthRequest, res: Response) => {
+  // check if projectId exist in database
+  const userId = getUserId(req, res);
+  if (!userId) return;
+
+  const projectId = validateProjectId(req.params.projectId, res);
+  if (!projectId) return;
+
+});
 
 export default router;
