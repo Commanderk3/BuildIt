@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
-export async function downloadProject(files: Record<string, string>) {
+export async function downloadProject(files: Record<string, string>, projectName: string) {
   const zip = new JSZip();
 
   Object.entries(files).forEach(([path, content]) => {
@@ -12,5 +12,5 @@ export async function downloadProject(files: Record<string, string>) {
 
   const blob = await zip.generateAsync({ type: "blob" });
 
-  saveAs(blob, "my-project.zip");
+  saveAs(blob, `${projectName}.zip`);
 }

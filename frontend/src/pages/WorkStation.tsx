@@ -110,7 +110,7 @@ export default function WorkStation() {
               size="icon"
               variant="outline"
               onClick={() => {
-                downloadProject(files);
+                downloadProject(files, title);
               }}
             >
               <ArrowDownToLine className="h-4 w-4" />
