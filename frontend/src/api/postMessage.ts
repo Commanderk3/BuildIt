@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API } from "./auth";
 
 type LlmResponse =
   | {
@@ -35,7 +36,7 @@ type Message = {
   createdAt: number;
 };
 
-const API = "https://l012eckn68.execute-api.ap-south-1.amazonaws.com/project";
+const projectAPI = `${API}/project`;
 
 async function sendNewProjectQuery(messages: Message[]) {
   try {
@@ -43,7 +44,7 @@ async function sendNewProjectQuery(messages: Message[]) {
     console.log(token);
 
     const res = await axios.post<ApiResponse>(
-      `${API}/newProject`,
+      `${projectAPI}/newProject`,
       { messages }, // send messages array
       {
         headers: {
@@ -67,7 +68,7 @@ async function sendUserQuery(msgList: Message[], projectId: string) {
     const token = localStorage.getItem("token");
 
     const res = await axios.post<ApiResponse>(
-      `${API}/ask/${projectId}`,
+      `${projectAPI}/ask/${projectId}`,
       { messages: msgList },
       {
         headers: {
@@ -92,7 +93,7 @@ async function deleteProject(projectId: string) {
     const token = localStorage.getItem("token");
 
     const res = await axios.delete<DeleteResponse>(
-      `${API}/delete/${projectId}`,
+      `${projectAPI}/delete/${projectId}`,
       {
         headers: {
           "Content-Type": "application/json",

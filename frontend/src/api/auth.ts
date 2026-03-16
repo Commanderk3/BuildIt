@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const API = "https://l012eckn68.execute-api.ap-south-1.amazonaws.com/auth";
+const API = "http://localhost:3000";
 
 const sendOtp = async (email: string) => {
   try {
-    const res = await axios.post(`${API}/send-otp`, { email });
+    const res = await axios.post(`${API}/auth/send-otp`, { email });
     return res;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -17,7 +17,7 @@ const sendOtp = async (email: string) => {
 
 const verifyOtp = async (email: string, otp: string) => {
   try {
-    const res = await axios.post(`${API}/verify-otp`, {
+    const res = await axios.post(`${API}/auth/verify-otp`, {
       email,
       otp,
     });
@@ -40,7 +40,7 @@ const registerUser = async (
   password: string,
 ) => {
   try {
-    const res = await axios.post(`${API}/signup`, {
+    const res = await axios.post(`${API}/auth/signup`, {
       username,
       email,
       password,
@@ -61,7 +61,7 @@ const loginUser = async (
   password: string,
 ) => {
   try {
-    const response = await axios.post(`${API}/login`, {
+    const response = await axios.post(`${API}/auth/login`, {
       email,
       password,
     });
@@ -77,4 +77,4 @@ const loginUser = async (
   }
 };
 
-export { sendOtp, verifyOtp, registerUser, loginUser };
+export { sendOtp, verifyOtp, registerUser, loginUser, API };
