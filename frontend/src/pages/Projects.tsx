@@ -14,6 +14,7 @@ import { getUserDetails } from "@/api/getUser";
 
 import { useUser } from "../contexts/UserContext";
 import { useBuild } from "@/contexts/BuildContext";
+import useLocalProject from "@/lib/localProject";
 
 type Message = {
   id: string;
@@ -26,7 +27,7 @@ export default function ProjectsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const { username, setUser, clearUser } = useUser();
-  const { loadProject, renderCode, updateTitle } = useBuild();
+  const { renderCode, updateTitle } = useBuild();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,7 +77,6 @@ export default function ProjectsPage() {
 
       const { project, llmResponse } = res;
 
-      loadProject(project.projectId, false);
 
       if (llmResponse.to === "user") {
         const chatHistory: Message[] = [

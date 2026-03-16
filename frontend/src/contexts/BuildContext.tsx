@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { testFile2 } from "@/constants/testFileString";
 import { addInspectorImport } from "@/lib/ast/parser";
 import updateCode from "@/lib/ast/updateCode";
+import useLocalProject from "@/lib/localProject";
 
 export type SelectedElement = {
   tag: string;
@@ -33,7 +34,7 @@ type BuildContextType = {
   selected: SelectedElement;
   setSelected: React.Dispatch<React.SetStateAction<SelectedElement>>;
   setNodeMap: React.Dispatch<React.SetStateAction<NodeMap>>;
-  loadProject: (projectId: string, pullCode: boolean) => void;
+  loadProjectFromIndexDB: (projectId: string) => void;
 };
 
 const BuildContext = createContext<BuildContextType | null>(null);
@@ -46,7 +47,7 @@ type ResponseFiles = {
   files: Files;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
-}
+};
 
 export function BuildProvider({ children }: BuildProviderProps) {
   const [selected, setSelected] = useState<SelectedElement>(null);
@@ -58,14 +59,28 @@ export function BuildProvider({ children }: BuildProviderProps) {
     Record<string, { from: number; to: number }>
   >({});
 
-  const loadProject = (projectId: string, pullCode: boolean) => {
-    setProjectId(projectId);
-    if (pullCode) {
+  const loadProjectFromGitHub = async (projectId: string) => {
+    try {
+      setProjectId(projectId);
       // pull code from github and convert it to Files
-      // or read text file data
       setFiles(testFile2);
-    } else {
-      setFiles(testFile2); // default page
+    } catch (err) {
+      console.error("Error occured ", err);
+    }
+  };
+
+  const loadProjectFromIndexDB = async (projectId: string) => {
+    try {
+      const loadedFiles = await useLocalProject("load", projectId);
+      if (loadedFiles === null) {
+        setFiles(testFile2);
+        throw new Error("File not found");
+      } else {
+        setProjectId(projectId);
+        setFiles(loadedFiles);
+      }
+    } catch (err) {
+      console.error("Error occured", err);
     }
   };
 
@@ -73,12 +88,13 @@ export function BuildProvider({ children }: BuildProviderProps) {
     setTitle(title);
   };
 
-  const renderCode = (code: string) => { 
+  const renderCode = (code: string) => {
     const files: ResponseFiles = JSON.parse(code);
     // check if valid structure
     // render code
     console.log("Rendering .....", files);
     setFiles(files.files);
+    useLocalProject("save", projectId, files.files);
   };
 
   const updateFiles = (newFiles: Files): void => {
@@ -113,7 +129,7 @@ export function BuildProvider({ children }: BuildProviderProps) {
     injectedFiles,
     updateTitle,
     projectId,
-    loadProject,
+    loadProjectFromIndexDB,
     setInjectedFiles,
     setSelected,
     setNodeMap,

@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { motion } from "motion/react";
 import { NavBar } from "@/components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  const navigate = useNavigate();
   return (
     <>
-      <NavBar page={"/"} />
+    <NavBar page={"/"} />
       <div className="flex flex-col min-h-screen">
         <AuroraBackground>
           <motion.div
@@ -44,6 +46,7 @@ export default function HomePage() {
                     <Button
                       size="lg"
                       className="h-12 px-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={() => navigate("/projects")}
                     >
                       Try for free
                     </Button>
