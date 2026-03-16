@@ -6,6 +6,7 @@ import projectRoutes from "./routes/project.js"
 import userRoutes from "./routes/user.js"
 import auth from "./middleware/auth.js";
 import { MONGO_URI } from "./config.js";
+import serverless from "serverless-http";
 
 const app = express();
 const PORT = 3000;
@@ -13,10 +14,28 @@ const PORT = 3000;
 app.use(express.json());
 app.use(cors());
 
-mongoose
-  .connect(MONGO_URI as string)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error(err));
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) return;
+  
+  try {
+    const db = await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = mongoose.connection.readyState === 1;
+    console.log("MongoDB Connected");
+  } catch (err) {
+    console.error("MongoDB Connection Error:", err);
+    throw err;
+  }
+};
+
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
 
 app.get("/health", (req, res) => {
   res.status(200).send("Server is healthy.");
@@ -37,3 +56,6 @@ app.post("/fixError", auth, async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
+
+// export const handler = serverless(app);
