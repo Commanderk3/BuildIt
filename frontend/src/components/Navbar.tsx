@@ -15,7 +15,7 @@ export function NavBar({ page }: { page: string }) {
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md supports-[backdrop-filter]:bg-transparent">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="w-full flex h-16 items-center justify-between px-4 md:px-6">
         {/* Logo/Brand */}
         <div
           className="font-bold text-xl cursor-pointer hover:opacity-80 transition-opacity"
