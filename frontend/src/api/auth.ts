@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:3000/auth";
+const API = "https://l012eckn68.execute-api.ap-south-1.amazonaws.com/auth";
 
 const sendOtp = async (email: string) => {
   try {
@@ -68,9 +68,12 @@ const loginUser = async (
     console.log(response);
 
     return response.data;
-  } catch (error: any) {
-    const message = error.response?.data?.message || "Login failed";
-    throw new Error(message);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message || error.message || "Login failed";
+      throw new Error(message);
+    }
+    throw new Error("Unknown login error");
   }
 };
 

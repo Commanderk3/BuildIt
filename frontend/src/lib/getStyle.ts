@@ -13,7 +13,7 @@ function tailwindColorToHex(token: string): string | null {
 
     if (!colorName) return null;
 
-    const palette = (colors as any)[colorName];
+    const palette = (colors as Record<string, string | Record<string, string>>)[colorName];
     if (!palette) return null;
 
     let value: string | undefined;

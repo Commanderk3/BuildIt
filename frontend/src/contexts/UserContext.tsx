@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -9,10 +10,15 @@ type Project = {
   mode: "planner" | "builder";
 };
 
+type User = {
+  username: string;
+  projects?: Project[];
+};
+
 type UserContextType = {
   username: string | null;
   projects: Project[];
-  setUser: (user: any) => void;
+  setUser: (user: User) => void;
   clearUser: () => void;
 };
 
@@ -22,7 +28,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [username, setUsername] = useState<string | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
 
-  const setUser = (user: any) => {
+  const setUser = (user: User) => {
     setUsername(user.username);
     setProjects(user.projects || []);
   };

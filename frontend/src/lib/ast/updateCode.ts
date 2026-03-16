@@ -1,5 +1,5 @@
 import type { NodeMap, SelectedElement } from "@/contexts/BuildContext";
-import { Project, SyntaxKind, Node, JsxOpeningElement, JsxSelfClosingElement, JsxAttribute } from "ts-morph";
+import { Project, Node } from "ts-morph";
 
 type Files = Record<string, string>;
 

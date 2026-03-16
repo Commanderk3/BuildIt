@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import { testFile, testFile2 } from "@/constants/testFileString";
+import { testFile2 } from "@/constants/testFileString";
 import { addInspectorImport } from "@/lib/ast/parser";
 import updateCode from "@/lib/ast/updateCode";
 
@@ -84,7 +85,9 @@ export function BuildProvider({ children }: BuildProviderProps) {
     setFiles(newFiles);
   };
 
-  const updateCodeText = (value: string): void => {};
+  const updateCodeText = (_value: string): void => {
+    void _value;
+  };
 
   const updateStyle = (property: string, value: string): void => {
     // FEAT: add debounce

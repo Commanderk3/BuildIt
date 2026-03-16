@@ -70,7 +70,7 @@ export default function WorkStation() {
     const inspectorCode = addInspectorImport(result.files);
     setInjectedFiles(inspectorCode);
     setNodeMap(result.map);
-  }, [mode]);
+  }, [files, mode, setInjectedFiles, setNodeMap]);
 
   return (
     <div className="flex overflow-hidden">
@@ -129,7 +129,7 @@ export default function WorkStation() {
         {/* Sandpack */}
         <div className="flex flex-1 overflow-hidden h-full w-screen">
           <div className="w-[30vw]">
-            <ChatWindow />
+            <ChatWindow key={projectId} />
           </div>
           <SandpackWindow mode={mode} />
         </div>

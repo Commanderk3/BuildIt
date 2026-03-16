@@ -35,7 +35,7 @@ type Message = {
   createdAt: number;
 };
 
-const API = "http://localhost:3000/project";
+const API = "https://l012eckn68.execute-api.ap-south-1.amazonaws.com/project";
 
 async function sendNewProjectQuery(messages: Message[]) {
   try {

@@ -58,22 +58,33 @@ const testFile = {
     `,
 };
 // coffee
+// const testFile2 = {
+//   "/index.tsx":
+//     "import React from 'react';import ReactDOM from 'react-dom/client';import App from './App';import './index.css';const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);root.render(<React.StrictMode><App /></React.StrictMode>);",
+//   "/App.tsx":
+//     "import React from 'react';import HeroSection from './components/HeroSection';const App: React.FC = () => {return (<div className=\"min-h-screen bg-gray-100\"><HeroSection /></div>);};export default App;",
+//   "/components/HeroSection.tsx":
+//     "import React from 'react';import ShopNameDisplay from './ShopNameDisplay';import TaglineDisplay from './TaglineDisplay';import CTAButton from './CTAButton';const HeroSection: React.FC = () => {return (<section className=\"relative h-screen flex items-center justify-center bg-amber-900 text-white overflow-hidden\"><div className=\"absolute inset-0 bg-cover bg-center opacity-20\" style={{ backgroundImage: 'url(\"https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D\")' }}></div><div className=\"relative z-10 text-center p-4\"><ShopNameDisplay /><TaglineDisplay /><CTAButton /></div></section>);};export default HeroSection;",
+//   "/components/ShopNameDisplay.tsx":
+//     "import React from 'react';const ShopNameDisplay: React.FC = () => {return (<h1 className=\"text-5xl md:text-7xl font-bold tracking-tight mb-4 drop-shadow-lg\">Brew Haven</h1>);};export default ShopNameDisplay;",
+//   "/components/TaglineDisplay.tsx":
+//     "import React from 'react';const TaglineDisplay: React.FC = () => {return (<p className=\"text-xl md:text-2xl font-light mb-8 max-w-xl mx-auto drop-shadow-md\">Your Daily Dose of Delight</p>);};export default TaglineDisplay;",
+//   "/components/CTAButton.tsx":
+//     "import React from 'react';const CTAButton: React.FC = () => {return (<button className=\"bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105\">Explore Our Menu</button>);};export default CTAButton;",
+//   "/tailwind.config.js":
+//     "/** @type {import('tailwindcss').Config} */module.exports = {content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],theme: {extend: {},},plugins: [],};",
+//   "/index.css": "@tailwind base;@tailwind components;@tailwind utilities;",
+// };
+
 const testFile2 = {
   "/index.tsx":
     "import React from 'react';import ReactDOM from 'react-dom/client';import App from './App';import './index.css';const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);root.render(<React.StrictMode><App /></React.StrictMode>);",
+
   "/App.tsx":
-    "import React from 'react';import HeroSection from './components/HeroSection';const App: React.FC = () => {return (<div className=\"min-h-screen bg-gray-100\"><HeroSection /></div>);};export default App;",
-  "/components/HeroSection.tsx":
-    "import React from 'react';import ShopNameDisplay from './ShopNameDisplay';import TaglineDisplay from './TaglineDisplay';import CTAButton from './CTAButton';const HeroSection: React.FC = () => {return (<section className=\"relative h-screen flex items-center justify-center bg-amber-900 text-white overflow-hidden\"><div className=\"absolute inset-0 bg-cover bg-center opacity-20\" style={{ backgroundImage: 'url(\"https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D\")' }}></div><div className=\"relative z-10 text-center p-4\"><ShopNameDisplay /><TaglineDisplay /><CTAButton /></div></section>);};export default HeroSection;",
-  "/components/ShopNameDisplay.tsx":
-    "import React from 'react';const ShopNameDisplay: React.FC = () => {return (<h1 className=\"text-5xl md:text-7xl font-bold tracking-tight mb-4 drop-shadow-lg\">Brew Haven</h1>);};export default ShopNameDisplay;",
-  "/components/TaglineDisplay.tsx":
-    "import React from 'react';const TaglineDisplay: React.FC = () => {return (<p className=\"text-xl md:text-2xl font-light mb-8 max-w-xl mx-auto drop-shadow-md\">Your Daily Dose of Delight</p>);};export default TaglineDisplay;",
-  "/components/CTAButton.tsx":
-    "import React from 'react';const CTAButton: React.FC = () => {return (<button className=\"bg-amber-700 hover:bg-amber-800 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105\">Explore Our Menu</button>);};export default CTAButton;",
-  "/tailwind.config.js":
-    "/** @type {import('tailwindcss').Config} */module.exports = {content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],theme: {extend: {},},plugins: [],};",
-  "/index.css": "@tailwind base;@tailwind components;@tailwind utilities;",
+    "import React from 'react';const App: React.FC = () => {return (<div className=\"min-h-screen flex items-center justify-center bg-gray-900 text-white px-6\"><div className=\"max-w-xl text-center\"><h1 className=\"text-3xl md:text-4xl font-bold mb-4\">No Project Generated Yet</h1><p className=\"text-gray-300 text-lg mb-6\">Discuss your ideas with the Planner Agent to generate your project.</p></div></div>);};export default App;",
+
+  "/index.css":
+    "body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#111827;color:white;}"
 };
 
 const testFile6 = {
@@ -328,4 +339,4 @@ const root = createRoot(document.getElementById("root")!);
 root.render(<App />);`,
 };
 
-export { testFile, testFile2, testFile3 };
+export { testFile, testFile2, testFile3, testFile4, testFile6 };
