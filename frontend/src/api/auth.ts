@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "https://l012eckn68.execute-api.ap-south-1.amazonaws.com";
+const API = "http://localhost:3000";
 
 const sendOtp = async (email: string) => {
   try {

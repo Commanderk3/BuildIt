@@ -14,13 +14,14 @@ import {
 export const Sidebar = () => {
   const { projects } = useUser();
   const navigate = useNavigate();
-  const { loadProjectFromIndexDB } = useBuild();
+  const { loadProjectFromIndexDB, setProjectId } = useBuild();
 
   const handleLoadProject = async (projectId: string) => {
+    setProjectId(projectId)
     await loadProjectFromIndexDB(projectId);
     navigate("/work");
   };
-
+ 
   return (
     <div className="w-80 pr-5 pt-16 bg-muted/10 flex flex-col">
       <div className="p-4">
@@ -41,9 +42,7 @@ export const Sidebar = () => {
                       <Button
                         variant="ghost"
                         className="w-70 justify-start text-left h-auto py-3 px-3 hover:bg-accent/50 transition-colors"
-                        onClick={() =>
-                          handleLoadProject(project.projectId)
-                        }
+                        onClick={() => handleLoadProject(project.projectId)}
                       >
                         <div className="flex items-start gap-3">
                           <FileText className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />

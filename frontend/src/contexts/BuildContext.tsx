@@ -5,6 +5,7 @@ import { testFile2 } from "@/constants/testFileString";
 import { addInspectorImport } from "@/lib/ast/parser";
 import updateCode from "@/lib/ast/updateCode";
 import useLocalProject from "@/lib/localProject";
+import { toast } from "sonner";
 
 export type SelectedElement = {
   tag: string;
@@ -24,11 +25,12 @@ type BuildContextType = {
   updateCodeText: (value: string) => void;
   updateStyle: (property: string, value: string) => void;
   updateFiles: (newFiles: Files) => void;
-  renderCode: (code: string) => void;
+  renderCode: (code: string, projectIdNo: string) => void;
   files: Files;
   injectedFiles: Files;
   title: string;
   updateTitle: (title: string) => void;
+  setProjectId: React.Dispatch<React.SetStateAction<string>>;
   projectId: string;
   setInjectedFiles: React.Dispatch<React.SetStateAction<Files>>;
   selected: SelectedElement;
@@ -63,14 +65,20 @@ export function BuildProvider({ children }: BuildProviderProps) {
     try {
       const loadedFiles = await useLocalProject("load", projectId);
       if (loadedFiles === null) {
+        console.log("*");
         setFiles(testFile2);
-        throw new Error("File not found");
+        throw new Error();
       } else {
         setProjectId(projectId);
         setFiles(loadedFiles);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error occured", err);
+      toast.error("File not found");
+      setTimeout(() => {
+        toast.message("Checking GitHub Repository ...");
+        // loadProjectFromGitHub sequence.
+      }, 3000)
     }
   };
 
@@ -78,13 +86,12 @@ export function BuildProvider({ children }: BuildProviderProps) {
     setTitle(title);
   };
 
-  const renderCode = (code: string) => {
+  const renderCode = (code: string, projectIdNo: string) => {
     const files: ResponseFiles = JSON.parse(code);
-    // check if valid structure
     // render code
     console.log("Rendering .....", files);
     setFiles(files.files);
-    useLocalProject("save", projectId, files.files);
+    useLocalProject("save", projectIdNo, files.files);
   };
 
   const updateFiles = (newFiles: Files): void => {
@@ -118,6 +125,7 @@ export function BuildProvider({ children }: BuildProviderProps) {
     title,
     injectedFiles,
     updateTitle,
+    setProjectId,
     projectId,
     loadProjectFromIndexDB,
     setInjectedFiles,

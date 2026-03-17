@@ -4,12 +4,26 @@ const version = 3;
 
 type Files = Record<string, string>;
 
+interface StoredProject {
+  projectId: string;
+  files: Files;
+  lastUpdated: number;
+}
+
 const useLocalProject = (
   importOrExport: "load" | "save",
   projectId: string,
   files?: Files,
 ): Promise<Files | null> => {
   return new Promise((resolve, reject) => {
+    // Debug: Check if projectId exists at the start
+    console.log('useLocalProject called with:', { importOrExport, projectId, filesExists: !!files });
+
+    if (!projectId) {
+      reject(new Error("projectId is required"));
+      return;
+    }
+
     const request = indexedDB.open(dbName, version);
 
     request.onerror = () => {
@@ -21,11 +35,13 @@ const useLocalProject = (
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(storeName)) {
         db.createObjectStore(storeName, { keyPath: "projectId" });
+        console.log('Object store created');
       }
     };
 
     request.onsuccess = () => {
       const db = request.result;
+      console.log('Database opened successfully');
 
       if (importOrExport === "save") {
         // Save mode
@@ -35,82 +51,54 @@ const useLocalProject = (
           return;
         }
 
+        // Debug: Check values before transaction
+        console.log('Attempting to save:', { projectId, filesKeys: Object.keys(files) });
+
         const transaction = db.transaction([storeName], "readwrite");
         const store = transaction.objectStore(storeName);
 
-        const getAllRequest = store.getAll();
-
-        getAllRequest.onsuccess = () => {
-          const allProjects = getAllRequest.result;
-          const existingProject = allProjects.find(
-            (p) => p.projectId === projectId,
-          );
-
-          if (existingProject) {
-            const request = store.put({
-              projectId,
-              files,
-              lastUpdated: Date.now(),
-            });
-
-            request.onsuccess = () => {
-              console.log(`Project "${projectId}" updated successfully`);
-              resolve(null);
-              db.close();
-            };
-
-            return;
-          }
-
-          // If we already have 5 projects, remove the oldest
-          if (allProjects.length >= 5) {
-            allProjects.sort((a, b) => a.lastUpdated - b.lastUpdated);
-            const deleteRequest = store.delete(allProjects[0].projectId);
-
-            deleteRequest.onsuccess = () => {
-              const request = store.put({
-                projectId,
-                files,
-                lastUpdated: Date.now(),
-              });
-
-              request.onsuccess = () => {
-                console.log(
-                  `Project "${projectId}" saved successfully (oldest removed)`,
-                );
-                resolve(null);
-                db.close();
-              };
-            };
-          } else {
-            // Less than 5 projects, just save
-            const request = store.put({
-              projectId,
-              files,
-              lastUpdated: Date.now(),
-            });
-
-            request.onsuccess = () => {
-              console.log(`Project "${projectId}" saved successfully`);
-              resolve(null);
-              db.close();
-            };
-          }
-
-          request.onerror = () => {
-            console.error("Error saving project:", request.error);
-            reject(request.error);
-            db.close();
-          };
+        // Direct save approach - simpler and more reliable
+        console.log('Directly saving project with ID:', projectId);
+        
+        const projectToSave: StoredProject = {
+          projectId: projectId, // Explicitly set the key
+          files: files,
+          lastUpdated: Date.now(),
         };
 
-        getAllRequest.onerror = () => {
-          console.error("Error getting projects:", getAllRequest.error);
-          reject(getAllRequest.error);
+        // Debug: Log the exact object being saved
+        console.log('Project object to save:', projectToSave);
+        console.log('Does it have projectId?', !!projectToSave.projectId);
+
+        const putRequest = store.put(projectToSave);
+
+        putRequest.onsuccess = () => {
+          console.log(`Project "${projectId}" saved successfully`);
+          resolve(null);
           db.close();
         };
+
+        putRequest.onerror = () => {
+          console.error("Error saving project:", putRequest.error);
+          console.error("Failed project object:", projectToSave);
+          reject(putRequest.error);
+          db.close();
+        };
+
+        transaction.oncomplete = () => {
+          console.log('Transaction completed');
+        };
+
+        transaction.onerror = () => {
+          console.error("Transaction error:", transaction.error);
+          reject(transaction.error);
+          db.close();
+        };
+
       } else if (importOrExport === "load") {
-        // Export mode - retrieve files
+        // Load mode - retrieve files
+        console.log('Loading project with ID:', projectId);
+        
         const transaction = db.transaction([storeName], "readonly");
         const store = transaction.objectStore(storeName);
 
@@ -118,8 +106,8 @@ const useLocalProject = (
 
         getRequest.onsuccess = () => {
           if (getRequest.result) {
-            console.log(`Project "${projectId}" loaded successfully`);
-            resolve(getRequest.result.files);
+            console.log(`Project "${projectId}" loaded successfully:`, getRequest.result);
+            resolve((getRequest.result as StoredProject).files);
           } else {
             console.log(`Project "${projectId}" not found`);
             resolve(null);

@@ -82,6 +82,6 @@ npx shadcn@latest add button
 ## Notes / TODO
 
 - Add stronger type guards around cross-window message payloads in WorkStation event handling.
-- Define and document the backend chat persistence + streaming contract before wiring full frontend integration.
+- Add a limit to store projects in indexDB
+- Notify if project fetching failed
 
-- Message slide show in prompt box

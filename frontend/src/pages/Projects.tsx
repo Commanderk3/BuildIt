@@ -26,7 +26,7 @@ export default function ProjectsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const { username, setUser, clearUser } = useUser();
-  const { renderCode, updateTitle } = useBuild();
+  const { renderCode, updateTitle, setProjectId } = useBuild();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,6 +76,7 @@ export default function ProjectsPage() {
 
       const { project, llmResponse } = res;
 
+      setProjectId(project.projectId);
 
       if (llmResponse.to === "user") {
         const chatHistory: Message[] = [
@@ -93,8 +94,13 @@ export default function ProjectsPage() {
           JSON.stringify(chatHistory),
         );
       } else if (llmResponse.to === "builder") {
+        const chatHistory: Message[] = [userMessage[0]];
+        localStorage.setItem(
+          `chat_${project.projectId}`,
+          JSON.stringify(chatHistory),
+        );
         updateTitle(llmResponse.projectName);
-        renderCode(llmResponse.message);
+        renderCode(llmResponse.message, project.projectId);
       }
       navigate("/work");
     } catch (error: unknown) {

@@ -6,7 +6,7 @@ import { useBuild } from "@/contexts/BuildContext";
 import { getStylesOfNode } from "../lib/getStyle";
 import { injectNodeIdsIntoTsx, addInspectorImport } from "@/lib/ast/parser";
 import { downloadProject } from "@/lib/generateProject";
-import { ChatWindow } from "@/components/Chat/ChatWindow";
+import { ChatWindow } from "@/components/ChatWindow";
 import { Trash2, ArrowDownToLine } from "lucide-react";
 
 import { deleteProject } from "@/api/postMessage";

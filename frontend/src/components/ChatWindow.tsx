@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Send } from "lucide-react";
-import TextareaAutosize from "react-textarea-autosize"
+import TextareaAutosize from "react-textarea-autosize";
 
 import { sendUserQuery } from "@/api/postMessage";
 import { useBuild } from "@/contexts/BuildContext";
@@ -24,17 +24,7 @@ type Messages = Message[];
 export const ChatWindow = () => {
   const { projectId, updateTitle, renderCode } = useBuild();
 
-  const [msgList, setMsgHistory] = useState<Messages>(() => {
-    if (!projectId) return [];
-    const storedMessages = localStorage.getItem(`chat_${projectId}`);
-    if (!storedMessages) return [];
-    try {
-      const parsed = JSON.parse(storedMessages);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  });
+  const [msgList, setMsgHistory] = useState<Messages>([]);
 
   const [inputValue, setInputValue] = useState("");
 
@@ -57,7 +47,7 @@ export const ChatWindow = () => {
 
       if (llmResponse.to === "builder") {
         updateTitle(llmResponse.projectName);
-        renderCode(llmResponse.message);
+        renderCode(llmResponse.message, projectId);
         return;
       }
 
@@ -69,15 +59,34 @@ export const ChatWindow = () => {
       };
 
       setMsgHistory((prev) => [...prev, botMessage]);
+      console.log("messages", msgList);
     } catch (error: unknown) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    if (!projectId) return;
+    const storedMessages = localStorage.getItem(`chat_${projectId}`);
+    console.log(storedMessages, projectId);
+    if (storedMessages) {
+      try {
+        const parsed = JSON.parse(storedMessages);
+        setMsgHistory(parsed);
+      } catch (error) {
+        console.error("Failed to parse stored messages:", error);
+        setMsgHistory([]);
+      }
+    } else {
+      setMsgHistory([]);
+    }
+  }, []);
 
-    localStorage.setItem(`chat_${projectId}`, JSON.stringify(msgList));
+  useEffect(() => {
+    if (!projectId) return;
+    if (msgList.length > 0) {
+      // Only save if there are messages
+      localStorage.setItem(`chat_${projectId}`, JSON.stringify(msgList));
+    }
   }, [msgList, projectId]);
 
   const formatTime = (timestamp: number) => {
