@@ -12,5 +12,6 @@ function requireEnv(name: string): string {
 const GEMINI_KEY = requireEnv("GEMINI_KEY");
 const JWT_SECRET= requireEnv("JWT_SECRET");
 const MONGO_URI = requireEnv("MONGO_URI");
+const NODE_ENV = requireEnv("NODE_ENV");
 
-export { GEMINI_KEY, JWT_SECRET, MONGO_URI }
+export { GEMINI_KEY, JWT_SECRET, MONGO_URI, NODE_ENV }
