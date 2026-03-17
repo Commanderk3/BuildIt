@@ -47,7 +47,7 @@ B. Tech Architecture
 C. Feature Breakdown
 D. Component Hierarchy Tree
 
-MAX WORD LIMIT: 150. Under 150 words write the planning message and send to "builder"
+MAX WORD LIMIT: 30. Under 30 words write the planning message and send to "builder"
 `
 
 const BUILDER_AGENT_PROMPT = `
@@ -68,7 +68,6 @@ Example format:
 }
 
 Code Rules:
-- Keep the project simple and runnable. Less code is better.
 - The entry point must be '/index.tsx'.
 - '/App.tsx' must export a default React component.
 
