@@ -9,7 +9,6 @@ const useLocalProject = (
   projectId: string,
   files?: Files,
 ): Promise<Files | null> => {
-
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, version);
 
@@ -39,21 +38,75 @@ const useLocalProject = (
         const transaction = db.transaction([storeName], "readwrite");
         const store = transaction.objectStore(storeName);
 
-        const saveRequest = store.put({
-          projectId,
-          files,
-          lastUpdated: Date.now(),
-        });
+        const getAllRequest = store.getAll();
 
-        saveRequest.onsuccess = () => {
-          console.log(`Project "${projectId}" saved successfully`);
-          resolve(null); // Save resolves with null
-          db.close();
+        getAllRequest.onsuccess = () => {
+          const allProjects = getAllRequest.result;
+          const existingProject = allProjects.find(
+            (p) => p.projectId === projectId,
+          );
+
+          if (existingProject) {
+            const request = store.put({
+              projectId,
+              files,
+              lastUpdated: Date.now(),
+            });
+
+            request.onsuccess = () => {
+              console.log(`Project "${projectId}" updated successfully`);
+              resolve(null);
+              db.close();
+            };
+
+            return;
+          }
+
+          // If we already have 5 projects, remove the oldest
+          if (allProjects.length >= 5) {
+            allProjects.sort((a, b) => a.lastUpdated - b.lastUpdated);
+            const deleteRequest = store.delete(allProjects[0].projectId);
+
+            deleteRequest.onsuccess = () => {
+              const request = store.put({
+                projectId,
+                files,
+                lastUpdated: Date.now(),
+              });
+
+              request.onsuccess = () => {
+                console.log(
+                  `Project "${projectId}" saved successfully (oldest removed)`,
+                );
+                resolve(null);
+                db.close();
+              };
+            };
+          } else {
+            // Less than 5 projects, just save
+            const request = store.put({
+              projectId,
+              files,
+              lastUpdated: Date.now(),
+            });
+
+            request.onsuccess = () => {
+              console.log(`Project "${projectId}" saved successfully`);
+              resolve(null);
+              db.close();
+            };
+          }
+
+          request.onerror = () => {
+            console.error("Error saving project:", request.error);
+            reject(request.error);
+            db.close();
+          };
         };
 
-        saveRequest.onerror = () => {
-          console.error("Error saving project:", saveRequest.error);
-          reject(saveRequest.error);
+        getAllRequest.onerror = () => {
+          console.error("Error getting projects:", getAllRequest.error);
+          reject(getAllRequest.error);
           db.close();
         };
       } else if (importOrExport === "load") {
