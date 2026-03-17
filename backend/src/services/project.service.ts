@@ -6,12 +6,13 @@ async function createNewProject(
   projectId: string,
   projectName: string,
   description: string,
+  mode: "planner" | "builder"
 ) {
   const project = {
     projectId,
     title: projectName,
     description,
-    mode: "planner",
+    mode,
   };
 
   const user = await User.findById(userId);
@@ -67,6 +68,7 @@ async function updateNameProject(
   projectId: string,
   newTitle: string,
   newDescription: string,
+  mode: "planner" | "builder"
 ) {
   try {
     const result = await User.updateOne(
@@ -75,6 +77,7 @@ async function updateNameProject(
         $set: {
           "projects.$.title": newTitle,
           "projects.$.description": newDescription,
+          "projects.$.mode": mode
         },
       },
     );

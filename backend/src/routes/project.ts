@@ -64,12 +64,14 @@ router.post("/newProject", async (req: AuthRequest, res: Response) => {
             projectId,
             llmResponse.projectName,
             llmResponse.description,
+            "builder"
           )
         : await createNewProject(
             userId,
             projectId,
             "New Project",
             "Make plans for your project",
+            "planner"
           );
 
     return res.status(200).json({
@@ -104,6 +106,7 @@ router.post("/ask/:projectId", async (req: AuthRequest, res: Response) => {
         projectId,
         llmResponse.projectName,
         llmResponse.description,
+        "builder"
       );
     }
     return res.status(200).json({ llmResponse });
