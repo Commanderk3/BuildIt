@@ -59,16 +59,6 @@ export function BuildProvider({ children }: BuildProviderProps) {
     Record<string, { from: number; to: number }>
   >({});
 
-  const loadProjectFromGitHub = async (projectId: string) => {
-    try {
-      setProjectId(projectId);
-      // pull code from github and convert it to Files
-      setFiles(testFile2);
-    } catch (err) {
-      console.error("Error occured ", err);
-    }
-  };
-
   const loadProjectFromIndexDB = async (projectId: string) => {
     try {
       const loadedFiles = await useLocalProject("load", projectId);

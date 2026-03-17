@@ -14,7 +14,6 @@ import { getUserDetails } from "@/api/getUser";
 
 import { useUser } from "../contexts/UserContext";
 import { useBuild } from "@/contexts/BuildContext";
-import useLocalProject from "@/lib/localProject";
 
 type Message = {
   id: string;
